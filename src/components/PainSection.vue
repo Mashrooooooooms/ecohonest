@@ -1,0 +1,461 @@
+<script setup>
+defineProps({ isActive: { type: Boolean, default: true } })
+
+const risks = [
+  { code: '8.2 ч.3.4', text: 'Обращение с отходами, повтор', sum: '150–200 тыс. ₽', stop: '—' },
+  { code: '8.2 ч.4',   text: 'Размещение отходов без лицензии', sum: 'до 400 тыс. ₽', stop: '—' },
+  { code: '8.21 ч.2',  text: 'Выбросы без разрешения', sum: 'до 250 тыс. ₽', stop: '90 сут' },
+  { code: '8.13 ч.4',  text: 'Нарушение водного кодекса', sum: 'до 300 тыс. ₽', stop: '90 сут' },
+  { code: '8.14',      text: 'Сброс сточных вод, превышение ПДК', sum: '80–100 тыс. ₽', stop: '90 сут' },
+  { code: '8.41',      text: 'Просрочка платы за НВОС', sum: '50–100 тыс. ₽', stop: '—' },
+  { code: '8.41.1',    text: 'Неуплата экологического сбора', sum: '3× суммы, мин. 500 тыс. ₽', stop: '—' },
+  { code: '8.5.1',     text: 'Сокрытие экологической информации', sum: '70–150 тыс. ₽', stop: '—' },
+  { code: '8.46',      text: 'Непостановка на учёт объекта НВОС', sum: 'до 100 тыс. ₽', stop: '—' }
+]
+
+const cases = [
+  { date: '04.03.2025', text: 'ВС РФ № 69-АД25-2-К7 — ч. 4 ст. 8.2 КоАП, размещение отходов', sum: '400 000 ₽' },
+  { date: '22.04.2026', text: 'Саратовская обл. — ст. 8.41.1 КоАП, неуплата экосбора', sum: '250 000 ₽' },
+  { date: '10.08.2026', text: 'Тисульский райсуд, Кузбасс — 3 золотодобывающих предприятия', sum: '90 суток' }
+]
+
+const deadlines = [
+  { d: '02.02', t: '2-ТП (отходы)' },
+  { d: '01.03', t: 'Плата за НВОС' },
+  { d: '10.03', t: 'Декларация о плате' },
+  { d: '15.04', t: 'Экологический сбор' }
+]
+
+const tickerItems = [
+  'КоАП 8.2 — до 400 000 ₽',
+  'КоАП 8.21 — до 250 000 ₽ · приостановка до 90 суток',
+  'КоАП 8.13 — до 300 000 ₽',
+  'КоАП 8.41.1 — 3× суммы, не менее 500 000 ₽',
+  'КоАП 8.5.1 — до 150 000 ₽ за сокрытие данных'
+]
+</script>
+
+<template>
+  <section class="pain" :class="{ 'pain--in': isActive }">
+    <div class="vignette"></div>
+
+    <div class="ticker ticker--top">
+      <div class="ticker-track">
+        <span v-for="(t, i) in tickerItems" :key="`t-${i}`" class="ticker-item">{{ t }}</span>
+        <span v-for="(t, i) in tickerItems" :key="`t-d-${i}`" class="ticker-item">{{ t }}</span>
+      </div>
+    </div>
+
+    <div class="frame">
+      <header class="top">
+        <span class="page">03</span>
+        <span class="rule"></span>
+        <span class="kicker">Риски · КоАП · Сроки</span>
+      </header>
+
+      <div class="body">
+        <div class="left">
+          <h2>
+            Цена<br />
+            <em>ошибки</em><br />
+            в строке
+          </h2>
+
+          <p class="lead">
+            Один неверный показатель в отчёте — статья, штраф, приостановка.
+            Ниже — санкции главы 8 КоАП РФ для юридических лиц на 2026 год.
+          </p>
+
+          <div class="meta">
+            <div class="meta-item">
+              <span class="meta-n">9</span>
+              <span class="meta-t">составов</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-n">1 млн</span>
+              <span class="meta-t">макс. штраф</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-n">90</span>
+              <span class="meta-t">суток стоп</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="right">
+          <div class="table">
+            <div class="thead">
+              <span>КоАП</span>
+              <span>Нарушение</span>
+              <span class="ta-r">Штраф юрлицу</span>
+              <span class="ta-r">Стоп</span>
+            </div>
+
+            <div v-for="r in risks" :key="r.code" class="tr">
+              <span class="td-code">{{ r.code }}</span>
+              <span class="td-text">{{ r.text }}</span>
+              <span class="td-sum">{{ r.sum }}</span>
+              <span class="td-stop" :class="{ 'td-stop--yes': r.stop !== '—' }">{{ r.stop }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer class="bottom">
+        <div class="block">
+          <span class="block-head">Судебная практика</span>
+          <ul class="cases">
+            <li v-for="c in cases" :key="c.date" class="case">
+              <span class="case-date">{{ c.date }}</span>
+              <span class="case-text">{{ c.text }}</span>
+              <span class="case-sum">{{ c.sum }}</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="block">
+          <span class="block-head">Сроки отчётности</span>
+          <ul class="dates">
+            <li v-for="d in deadlines" :key="d.d" class="date">
+              <span class="date-d">{{ d.d }}</span>
+              <span class="date-t">{{ d.t }}</span>
+            </li>
+          </ul>
+          <p class="fine">Декларация НВОС — п. 8 ст. 16.4 ФЗ № 7-ФЗ. Экосбор — ст. 24.5 ФЗ № 89-ФЗ. Просрочка = ст. 8.41 / 8.41.1 КоАП.</p>
+        </div>
+      </footer>
+    </div>
+
+    <div class="ticker ticker--bottom">
+      <div class="ticker-track ticker-track--reverse">
+        <span v-for="(t, i) in tickerItems" :key="`b-${i}`" class="ticker-item">{{ t }}</span>
+        <span v-for="(t, i) in tickerItems" :key="`b-d-${i}`" class="ticker-item">{{ t }}</span>
+      </div>
+    </div>
+  </section>
+</template>
+
+<style scoped>
+.pain {
+  position: relative;
+  height: 100vh;
+  padding: 50px 0;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.15) 0%,
+    rgba(60, 15, 5, 0.3) 50%,
+    rgba(0, 0, 0, 0.65) 100%
+  );
+  color: #f5ece2;
+  font-family: Georgia, "Times New Roman", serif;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.pain:not(.pain--in) {
+  opacity: 0;
+  transform: translateY(24px);
+}
+
+.pain.pain--in {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.9s ease, transform 0.9s ease;
+}
+
+.vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 85% 100% at 55% 50%,
+    rgba(35, 8, 2, 0.78) 0%,
+    rgba(35, 8, 2, 0.42) 60%,
+    rgba(35, 8, 2, 0.05) 100%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+.ticker {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  border-top: 1px solid rgba(245, 236, 226, 0.25);
+  border-bottom: 1px solid rgba(245, 236, 226, 0.25);
+  padding: 8px 0;
+  overflow: hidden;
+}
+
+.ticker-track {
+  display: inline-flex;
+  align-items: center;
+  gap: 40px;
+  white-space: nowrap;
+  animation: ticker 50s linear infinite;
+  font-family: system-ui, sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(245, 236, 226, 0.7);
+}
+
+.ticker-track--reverse { animation-direction: reverse; }
+
+.ticker-item::before {
+  content: '·';
+  margin-right: 40px;
+  color: #e87a35;
+}
+
+@keyframes ticker {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.frame {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  padding: 14px 70px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-family: system-ui, sans-serif;
+}
+
+.page { font-size: 11px; letter-spacing: 0.2em; color: #e87a35; }
+.rule { flex: 1; height: 1px; background: rgba(245, 236, 226, 0.4); }
+.kicker { font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase; color: rgba(245, 236, 226, 0.9); }
+
+.body {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 0.75fr 1.65fr;
+  gap: 46px;
+  align-items: center;
+  min-height: 0;
+}
+
+.left {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+h2 {
+  font-size: clamp(42px, 5vw, 76px);
+  font-weight: 400;
+  letter-spacing: -0.045em;
+  line-height: 0.9;
+  color: #f5ece2;
+}
+
+h2 em {
+  font-style: italic;
+  color: #e87a35;
+}
+
+.lead {
+  font-family: system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  color: rgba(245, 236, 226, 0.72);
+  max-width: 340px;
+}
+
+.meta {
+  display: flex;
+  gap: 24px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(245, 236, 226, 0.15);
+}
+
+.meta-item { display: flex; flex-direction: column; gap: 2px; }
+
+.meta-n {
+  font-family: Georgia, serif;
+  font-size: 22px;
+  line-height: 1;
+  color: #e87a35;
+}
+
+.meta-t {
+  font-family: system-ui, sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(245, 236, 226, 0.55);
+}
+
+.right {
+  min-height: 0;
+  display: flex;
+  align-items: center;
+}
+
+.table {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  font-family: system-ui, sans-serif;
+  border-top: 1px solid rgba(245, 236, 226, 0.35);
+}
+
+.thead,
+.tr {
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr) 170px 72px;
+  column-gap: 20px;
+  align-items: center;
+  padding: 7px 0;
+  border-bottom: 1px solid rgba(245, 236, 226, 0.1);
+}
+
+.thead {
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(245, 236, 226, 0.45);
+  border-bottom-color: rgba(245, 236, 226, 0.28);
+}
+
+.ta-r { text-align: right; }
+
+.td-code {
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: #e87a35;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.td-text {
+  font-size: 13px;
+  line-height: 1.3;
+  color: rgba(245, 236, 226, 0.85);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.td-sum {
+  font-size: 13px;
+  font-weight: 600;
+  color: #f5ece2;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.td-stop {
+  font-size: 11px;
+  text-align: right;
+  color: rgba(245, 236, 226, 0.35);
+  white-space: nowrap;
+}
+
+.td-stop--yes {
+  color: #d14028;
+  font-weight: 700;
+}
+
+.bottom {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 46px;
+  border-top: 1px solid rgba(245, 236, 226, 0.2);
+  padding-top: 10px;
+}
+
+.block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.block-head {
+  font-family: system-ui, sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: #e87a35;
+}
+
+.cases { display: flex; flex-direction: column; gap: 6px; }
+
+.case {
+  display: grid;
+  grid-template-columns: 78px minmax(0, 1fr) 92px;
+  gap: 14px;
+  align-items: center;
+  font-family: system-ui, sans-serif;
+}
+
+.case-date {
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: rgba(245, 236, 226, 0.5);
+}
+
+.case-text {
+  font-size: 12px;
+  line-height: 1.35;
+  color: rgba(245, 236, 226, 0.82);
+}
+
+.case-sum {
+  font-size: 13px;
+  font-weight: 700;
+  color: #f5ece2;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.dates { display: flex; gap: 22px; flex-wrap: wrap; }
+
+.date { display: flex; flex-direction: column; gap: 2px; font-family: system-ui, sans-serif; }
+
+.date-d {
+  font-family: Georgia, serif;
+  font-size: 20px;
+  line-height: 1;
+  color: #e87a35;
+}
+
+.date-t {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(245, 236, 226, 0.6);
+}
+
+.fine {
+  font-family: system-ui, sans-serif;
+  font-size: 10px;
+  line-height: 1.4;
+  color: rgba(245, 236, 226, 0.45);
+  margin-top: 4px;
+}
+
+@media (max-width: 1200px) {
+  .body { grid-template-columns: 1fr; gap: 20px; }
+  .bottom { grid-template-columns: 1fr; gap: 14px; }
+  .frame { padding: 14px 40px; }
+}
+
+@media (max-width: 900px) {
+  .thead, .tr { grid-template-columns: 76px minmax(0, 1fr) 140px; }
+  .td-stop, .thead span:last-child { display: none; }
+  .dates { gap: 16px; }
+  .case { grid-template-columns: 78px minmax(0, 1fr) 92px; }
+}
+</style>
