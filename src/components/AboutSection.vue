@@ -5,6 +5,8 @@ const steps = [
   { n: '03', title: 'Исполнение', text: 'Собираем данные, готовим документацию.' },
   { n: '04', title: 'Сдача', text: 'Формируем и сдаём отчёты точно в срок.' }
 ]
+
+const base = import.meta.env.BASE_URL
 </script>
 
 <template>
@@ -53,9 +55,9 @@ const steps = [
           <span class="kicker-small">— 02 · С объектов</span>
 
           <div class="shots">
-            <div class="shot shot--a" style="background-image: url('/1.png')"></div>
-            <div class="shot shot--b" style="background-image: url('/2.png')"></div>
-            <div class="shot shot--c" style="background-image: url('/3.png')"></div>
+            <div class="shot shot--a" :style="{ backgroundImage: `url(${base}1.png)` }"></div>
+            <div class="shot shot--b" :style="{ backgroundImage: `url(${base}2.png)` }"></div>
+            <div class="shot shot--c" :style="{ backgroundImage: `url(${base}3.png)` }"></div>
           </div>
 
           <p class="caption">Fig. 04 — наши сотрудники на объектах</p>
@@ -257,6 +259,9 @@ const steps = [
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 40px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
 .step {
