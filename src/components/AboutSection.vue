@@ -439,7 +439,6 @@ onBeforeUnmount(() => observer?.disconnect())
   .shots { aspect-ratio: 16 / 7; }
   .steps { grid-template-columns: repeat(2, 1fr); gap: 20px; }
 
-  /* контент не влез — скроллим строго внутри секции */
   .frame {
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
@@ -455,7 +454,6 @@ onBeforeUnmount(() => observer?.disconnect())
     height: 100dvh;
     padding: 20px 0 16px;
     overflow: hidden;
-    /* усиленное затемнение сверху и снизу */
     background: linear-gradient(
       to bottom,
       rgba(0, 0, 0, 0.35) 0%,
@@ -465,9 +463,10 @@ onBeforeUnmount(() => observer?.disconnect())
   }
 
   .frame {
-    padding: 16px 20px 8px;
-    gap: 18px;
+    padding: 14px 20px 8px;
+    gap: 12px;
     overflow-y: auto;
+    overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
   }
@@ -477,17 +476,17 @@ onBeforeUnmount(() => observer?.disconnect())
   .page { font-size: 10px; letter-spacing: 0.18em; }
   .kicker { font-size: 9px; letter-spacing: 0.18em; }
 
+  /* текст сверху, фотки под ним */
   .body {
     display: flex;
     flex-direction: column;
-    gap: 22px;
+    gap: 14px;
     min-height: 0;
   }
+  .left  { order: 1; gap: 10px; }
+  .right { order: 2; height: auto; gap: 8px; }
 
-  .left  { gap: 14px; }
-  .right { height: auto; gap: 10px; }
-
-  /* факты дублируют инфу из hero и services — на мобиле режем ради места */
+  /* факты дублируют инфу из hero/services — режем */
   .facts { display: none; }
 
   .right > .kicker-small {
@@ -496,7 +495,7 @@ onBeforeUnmount(() => observer?.disconnect())
     letter-spacing: 0.24em;
   }
 
-  /* ─── карусель ─── */
+  /* ─── карусель фото ─── */
   .shots {
     display: flex;
     gap: 10px;
@@ -506,12 +505,11 @@ onBeforeUnmount(() => observer?.disconnect())
     scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
     flex: none;
-    aspect-ratio: 16 / 10;
+    aspect-ratio: 16 / 9;
     width: 100%;
     border-radius: 4px;
     min-height: 0;
   }
-
   .shots::-webkit-scrollbar { display: none; }
 
   .shot {
@@ -520,13 +518,9 @@ onBeforeUnmount(() => observer?.disconnect())
     border-radius: 4px;
     box-shadow: none;
   }
-
   .shot--a { grid-column: auto; }
 
-  .caption {
-    font-size: 9px;
-    letter-spacing: 0.2em;
-  }
+  .caption { font-size: 9px; letter-spacing: 0.2em; }
 
   /* ─── текст ─── */
   .left .kicker-small {
@@ -546,71 +540,68 @@ onBeforeUnmount(() => observer?.disconnect())
     max-width: 100%;
   }
 
-  .facts {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    margin-top: 4px;
-    padding-top: 14px;
-  }
-
-  .fact-n { font-size: 20px; }
-
-  .fact-t {
-    font-size: 9px;
-    line-height: 1.35;
-    max-width: 100%;
-  }
-
-  /* ─── этапы — компактнее по вертикали ─── */
+  /* ─── этапы работ — горизонтальная карусель, поджаты к фото ─── */
   .bottom {
-    padding-top: 12px;
-    gap: 10px;
+    padding-top: 10px;
+    gap: 8px;
+    margin-top: 4px;
+    border-top: 1px solid rgba(238, 241, 232, 0.15);
   }
 
   .steps {
-    grid-template-columns: 1fr;
+    display: flex;
     gap: 10px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    margin: 0 -20px;
+    padding: 4px 20px 8px;
+    list-style: none;
+    grid-template-columns: none;
   }
+  .steps::-webkit-scrollbar { display: none; }
 
   .step {
-    gap: 2px;
-    padding-left: 16px;
+    flex: 0 0 78%;
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 12px 14px 14px 22px;
+    border: 1px solid rgba(238, 241, 232, 0.15);
+    border-radius: 4px;
+    background: rgba(20, 16, 10, 0.4);
+    position: relative;
   }
 
   .step::before {
-    top: 4px;
-    width: 8px;
+    left: 10px;
+    top: 16px;
+    width: 6px;
+    height: 1px;
+    background: #c9e265;
   }
 
-  .step-n {
-    font-size: 9px;
-    letter-spacing: 0.18em;
-  }
-  .step-t {
-    font-size: 11px;
-    letter-spacing: 0.18em;
-  }
-  .step-d {
-    font-size: 10px;
-    line-height: 1.3;
-  }
+  .step-n { font-size: 9px; letter-spacing: 0.18em; }
+  .step-t { font-size: 12px; letter-spacing: 0.18em; }
+  .step-d { font-size: 11px; line-height: 1.35; }
 
   .v-mark { display: none; }
 }
 
 @media (max-width: 380px) and (orientation: portrait) {
   .title { font-size: 36px; }
-  .fact-n { font-size: 18px; }
-  .fact-t { font-size: 8px; }
 
-  .bottom { padding-top: 10px; gap: 8px; }
-  .steps { gap: 8px; }
-  .step-t { font-size: 10px; }
-  .step-d { font-size: 9px; }
+  .step { flex: 0 0 86%; }
+  .step-t { font-size: 11px; }
+  .step-d { font-size: 10px; }
+
+  .bottom { padding-top: 8px; gap: 6px; }
 }
 
-/* ═════════ Мобила (ландшафт) — компактно, без scale-хаков ═════════ */
+/* ═════════ Мобила (ландшафт) ═════════ */
 
 @media (orientation: landscape) and (max-height: 500px) {
   .about {
