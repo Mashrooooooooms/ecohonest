@@ -1,7 +1,23 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 
-defineProps(['isActive'])
+defineProps({ isActive: { type: Boolean, default: true } })
+
+const entered = ref(false)
+const root = ref(null)
+let observer
+
+onMounted(() => {
+  observer = new IntersectionObserver(([entry]) => {
+    if (entry.isIntersecting) {
+      entered.value = true
+      observer.disconnect()
+    }
+  }, { threshold: 0.2 })
+  observer.observe(root.value)
+})
+
+onBeforeUnmount(() => observer?.disconnect())
 
 const services = [
   { n: '01', label: 'Вода',   text: 'НДС · ЗСО · 2-ТП (водхоз) · декларация сточных вод' },
@@ -20,7 +36,7 @@ const dir = ref('Вода')
 </script>
 
 <template>
-  <section class="services" :class="{ 'is-active': isActive }">
+  <section ref="root" class="services" :class="{ 'is-active': isActive || entered }">
     <div class="vignette"></div>
     <div class="dim"></div>
 
@@ -124,7 +140,7 @@ const dir = ref('Вода')
         </div>
 
         <div class="right">
-          <span class="kicker-small">— 04 направления</span>
+          <span class="kicker-small">04 направления</span>
 
           <h2 class="title">
             Всё, что нужно<br />
@@ -155,6 +171,8 @@ const dir = ref('Вода')
         <span>119361, г. Москва, ул. Марии Поливановой, д. 9, каб. 22</span>
         <span>+7 (991) 591-77-78 · info@ecohonest.ru</span>
       </footer>
+
+      <span class="v-mark">Ecohonest · 2026</span>
     </div>
   </section>
 </template>
@@ -176,15 +194,6 @@ const dir = ref('Вода')
   font-family: Georgia, "Times New Roman", serif;
   overflow: hidden;
   box-sizing: border-box;
-
-  opacity: 0;
-  transform: translateY(24px);
-  transition: opacity 0.9s ease, transform 0.9s ease;
-}
-
-.services.is-active {
-  opacity: 1;
-  transform: translateY(0);
 }
 
 /* круговое затемнение поверх фона — тёмный ореол справа, где текст */
@@ -208,6 +217,79 @@ const dir = ref('Вода')
   pointer-events: none;
   z-index: 0;
 }
+
+/* ═════════ Entrance animations ═════════ */
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(18px); filter: blur(6px); }
+  to   { opacity: 1; transform: translateY(0);    filter: blur(0); }
+}
+
+@keyframes fade-right {
+  from { opacity: 0; transform: translateX(-18px); filter: blur(6px); }
+  to   { opacity: 1; transform: translateX(0);     filter: blur(0); }
+}
+
+@keyframes title-reveal {
+  from { opacity: 0; transform: translateY(32px); filter: blur(14px); }
+  to   { opacity: 1; transform: translateY(0);    filter: blur(0); }
+}
+
+@keyframes rule-grow {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+@keyframes v-mark-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes phone-in {
+  from { opacity: 0; transform: translateY(40px) scale(0.96); filter: blur(10px); }
+  to   { opacity: 1; filter: blur(0); }
+}
+
+@keyframes dot-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(232, 122, 53, 0.55);
+    opacity: 1;
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(232, 122, 53, 0);
+    opacity: 0.7;
+  }
+}
+
+.services:not(.is-active) .top,
+.services:not(.is-active) .rule,
+.services:not(.is-active) .kicker,
+.services:not(.is-active) .phones,
+.services:not(.is-active) .kicker-small,
+.services:not(.is-active) .title,
+.services:not(.is-active) .item,
+.services:not(.is-active) .cta-big,
+.services:not(.is-active) .bottom,
+.services:not(.is-active) .v-mark {
+  opacity: 0;
+}
+
+.services.is-active .top        { animation: fade-right 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.05s both; }
+.services.is-active .rule       { transform-origin: left center; animation: rule-grow 1.1s cubic-bezier(0.22, 1, 0.36, 1) 0.25s both; }
+
+.services.is-active .phones     { animation: phone-in 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.35s both; }
+
+.services.is-active .kicker-small { animation: fade-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.35s both; }
+.services.is-active .title        { animation: title-reveal 1.1s cubic-bezier(0.22, 1, 0.36, 1) 0.45s both; }
+.services.is-active .item:nth-child(1) { animation: fade-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.65s both; }
+.services.is-active .item:nth-child(2) { animation: fade-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.75s both; }
+.services.is-active .item:nth-child(3) { animation: fade-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.85s both; }
+.services.is-active .item:nth-child(4) { animation: fade-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.95s both; }
+.services.is-active .cta-big      { animation: fade-up 0.9s cubic-bezier(0.22, 1, 0.36, 1) 1.10s both; }
+.services.is-active .bottom       { animation: fade-up 1.0s cubic-bezier(0.22, 1, 0.36, 1) 1.25s both; }
+.services.is-active .v-mark       { animation: v-mark-in 1.4s ease-out 0.15s both; }
+
+/* ─── Layout ─── */
 
 .frame {
   position: relative;
@@ -550,11 +632,24 @@ const dir = ref('Вода')
 }
 
 .kicker-small {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
   font-family: system-ui, sans-serif;
   font-size: 11px;
   letter-spacing: 0.28em;
   text-transform: uppercase;
   color: #e87a35;
+}
+
+.kicker-small::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #e87a35;
+  flex-shrink: 0;
+  animation: dot-pulse 2s ease-in-out infinite;
 }
 
 .title {
@@ -563,10 +658,11 @@ const dir = ref('Вода')
   letter-spacing: -0.035em;
   line-height: 0.94;
   color: #f5ece2;
+  margin-left: -0.035em;
 }
 
 .title em {
-  font-style: italic;
+  font-style: normal;
   color: #e87a35;
 }
 
@@ -574,6 +670,9 @@ const dir = ref('Вода')
   display: flex;
   flex-direction: column;
   gap: 16px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
 .item {
@@ -595,7 +694,13 @@ const dir = ref('Вода')
   border-radius: 50%;
   background: #e87a35;
   flex-shrink: 0;
+  animation: dot-pulse 2s ease-in-out infinite;
 }
+
+.item:nth-child(1) .dot { animation-delay: 0s; }
+.item:nth-child(2) .dot { animation-delay: 0.5s; }
+.item:nth-child(3) .dot { animation-delay: 1.0s; }
+.item:nth-child(4) .dot { animation-delay: 1.5s; }
 
 .line {
   width: 40px;
@@ -642,6 +747,7 @@ const dir = ref('Вода')
   letter-spacing: 0.02em;
   text-decoration: none;
   width: fit-content;
+  cursor: pointer;
   transition: background 0.15s ease, transform 0.15s ease;
 }
 
@@ -667,6 +773,22 @@ const dir = ref('Вода')
   color: rgba(245, 236, 226, 0.55);
 }
 
+/* ─── водяной знак ─── */
+.v-mark {
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: rotate(-90deg) translateX(-50%);
+  transform-origin: left center;
+  font-family: system-ui, sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: rgba(245, 236, 226, 0.4);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
 @media (max-width: 1100px) {
   .body { grid-template-columns: 1fr; gap: 40px; }
   .left { min-height: 540px; }
@@ -679,5 +801,26 @@ const dir = ref('Вода')
   .phone { --w: 160px; --h: 340px; }
   .phone--a, .phone--b { transform: none; }
   .bottom { flex-direction: column; align-items: flex-start; gap: 4px; }
+  .v-mark { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .services:not(.is-active) .top,
+  .services:not(.is-active) .rule,
+  .services:not(.is-active) .kicker,
+  .services:not(.is-active) .phones,
+  .services:not(.is-active) .kicker-small,
+  .services:not(.is-active) .title,
+  .services:not(.is-active) .item,
+  .services:not(.is-active) .cta-big,
+  .services:not(.is-active) .bottom,
+  .services:not(.is-active) .v-mark {
+    opacity: 1;
+  }
+  .services.is-active *,
+  .dot,
+  .kicker-small::before {
+    animation: none !important;
+  }
 }
 </style>

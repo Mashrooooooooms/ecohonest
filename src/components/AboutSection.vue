@@ -1,4 +1,6 @@
 <script setup>
+import { ref, onMounted, onBeforeUnmount } from 'vue'
+
 const steps = [
   { n: '01', title: 'Заявка', text: 'Консультация и оценка задачи.' },
   { n: '02', title: 'Договор', text: 'Фиксируем сроки и стоимость.' },
@@ -7,10 +9,26 @@ const steps = [
 ]
 
 const base = import.meta.env.BASE_URL
+
+const root = ref(null)
+const visible = ref(false)
+let observer
+
+onMounted(() => {
+  observer = new IntersectionObserver(([entry]) => {
+    if (entry.isIntersecting) {
+      visible.value = true
+      observer.disconnect()
+    }
+  }, { threshold: 0.2 })
+  observer.observe(root.value)
+})
+
+onBeforeUnmount(() => observer?.disconnect())
 </script>
 
 <template>
-  <section class="about">
+  <section ref="root" class="about" :class="{ 'is-visible': visible }">
     <div class="dim"></div>
 
     <div class="frame">
@@ -22,11 +40,11 @@ const base = import.meta.env.BASE_URL
 
       <div class="body">
         <div class="left">
-          <span class="kicker-small">— 01 · О компании</span>
+          <span class="kicker-small">01 · О компании</span>
 
           <h2 class="title">
             Честный<br />
-            <em>эколог</em>
+            эколог
           </h2>
 
           <p class="lead">
@@ -52,7 +70,7 @@ const base = import.meta.env.BASE_URL
         </div>
 
         <div class="right">
-          <span class="kicker-small">— 02 · С объектов</span>
+          <span class="kicker-small">02 · С объектов</span>
 
           <div class="shots">
             <div class="shot shot--a" :style="{ backgroundImage: `url(${base}1.png)` }"></div>
@@ -66,7 +84,7 @@ const base = import.meta.env.BASE_URL
 
       <footer class="bottom">
         <div class="steps-head">
-          <span class="kicker-small">— 03 · Этапы работ</span>
+          <span class="kicker-small">03 · Этапы работ</span>
         </div>
         <ol class="steps">
           <li v-for="s in steps" :key="s.n" class="step">
@@ -76,6 +94,8 @@ const base = import.meta.env.BASE_URL
           </li>
         </ol>
       </footer>
+
+      <span class="v-mark">Ecohonest · 2026</span>
     </div>
   </section>
 </template>
@@ -118,6 +138,95 @@ const base = import.meta.env.BASE_URL
   min-height: 0;
 }
 
+/* ═════════ Entrance animations ═════════ */
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(18px); filter: blur(6px); }
+  to   { opacity: 1; transform: translateY(0);    filter: blur(0); }
+}
+
+@keyframes fade-right {
+  from { opacity: 0; transform: translateX(-18px); filter: blur(6px); }
+  to   { opacity: 1; transform: translateX(0);     filter: blur(0); }
+}
+
+@keyframes fade-left {
+  from { opacity: 0; transform: translateX(24px); filter: blur(6px); }
+  to   { opacity: 1; transform: translateX(0);    filter: blur(0); }
+}
+
+@keyframes title-reveal {
+  from { opacity: 0; transform: translateY(32px); filter: blur(14px); }
+  to   { opacity: 1; transform: translateY(0);    filter: blur(0); }
+}
+
+@keyframes rule-grow {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+@keyframes v-mark-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes shot-in {
+  from { opacity: 0; transform: translateY(24px) scale(0.98); filter: blur(8px); }
+  to   { opacity: 1; transform: translateY(0) scale(1);        filter: blur(0); }
+}
+
+@keyframes dot-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(201, 226, 101, 0.55);
+    opacity: 1;
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(201, 226, 101, 0);
+    opacity: 0.7;
+  }
+}
+
+/* Hidden state */
+.about:not(.is-visible) .top,
+.about:not(.is-visible) .kicker-small,
+.about:not(.is-visible) .title,
+.about:not(.is-visible) .lead,
+.about:not(.is-visible) .facts,
+.about:not(.is-visible) .right,
+.about:not(.is-visible) .shot,
+.about:not(.is-visible) .caption,
+.about:not(.is-visible) .bottom,
+.about:not(.is-visible) .step,
+.about:not(.is-visible) .v-mark,
+.about:not(.is-visible) .rule {
+  opacity: 0;
+}
+
+/* Visible cascade */
+.about.is-visible .top        { animation: fade-right 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.05s both; }
+.about.is-visible .rule       { transform-origin: left center; animation: rule-grow 1.1s cubic-bezier(0.22, 1, 0.36, 1) 0.25s both; }
+
+.about.is-visible .left .kicker-small { animation: fade-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.25s both; }
+.about.is-visible .title              { animation: title-reveal 1.1s cubic-bezier(0.22, 1, 0.36, 1) 0.35s both; }
+.about.is-visible .lead               { animation: fade-up 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.60s both; }
+.about.is-visible .facts              { animation: fade-up 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.75s both; }
+
+.about.is-visible .right > .kicker-small { animation: fade-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.45s both; }
+.about.is-visible .shot--a               { animation: shot-in 1.0s cubic-bezier(0.22, 1, 0.36, 1) 0.55s both; }
+.about.is-visible .shot--b               { animation: shot-in 1.0s cubic-bezier(0.22, 1, 0.36, 1) 0.68s both; }
+.about.is-visible .shot--c               { animation: shot-in 1.0s cubic-bezier(0.22, 1, 0.36, 1) 0.81s both; }
+.about.is-visible .caption               { animation: fade-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.95s both; }
+
+.about.is-visible .bottom                { animation: fade-up 1.0s cubic-bezier(0.22, 1, 0.36, 1) 0.95s both; }
+.about.is-visible .step:nth-child(1)     { animation: fade-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) 1.05s both; }
+.about.is-visible .step:nth-child(2)     { animation: fade-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) 1.15s both; }
+.about.is-visible .step:nth-child(3)     { animation: fade-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) 1.25s both; }
+.about.is-visible .step:nth-child(4)     { animation: fade-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) 1.35s both; }
+
+.about.is-visible .v-mark { animation: v-mark-in 1.4s ease-out 0.15s both; }
+
+/* ═════════ Layout ═════════ */
+
 .top {
   display: flex;
   align-items: center;
@@ -130,12 +239,29 @@ const base = import.meta.env.BASE_URL
 .kicker { font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase; color: rgba(238, 241, 232, 0.9); }
 
 .kicker-small {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
   font-family: system-ui, sans-serif;
   font-size: 10px;
   letter-spacing: 0.28em;
   text-transform: uppercase;
   color: #c9e265;
 }
+
+.kicker-small::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #c9e265;
+  flex-shrink: 0;
+  animation: dot-pulse 2s ease-in-out infinite;
+}
+
+.left .kicker-small::before       { animation-delay: 0s; }
+.right > .kicker-small::before    { animation-delay: 0.6s; }
+.steps-head .kicker-small::before { animation-delay: 1.2s; }
 
 .body {
   flex: 1;
@@ -158,11 +284,7 @@ const base = import.meta.env.BASE_URL
   letter-spacing: -0.045em;
   line-height: 0.9;
   color: #eef1e8;
-}
-
-.title em {
-  font-style: italic;
-  color: #c9e265;
+  margin-left: -0.045em;
 }
 
 .lead {
@@ -299,6 +421,24 @@ const base = import.meta.env.BASE_URL
   color: rgba(238, 241, 232, 0.55);
 }
 
+/* ─── водяной знак ─── */
+.v-mark {
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: rotate(-90deg) translateX(-50%);
+  transform-origin: left center;
+  font-family: system-ui, sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: rgba(238, 241, 232, 0.4);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* ═════════ Responsive ═════════ */
+
 @media (max-width: 1100px) {
   .body { grid-template-columns: 1fr; gap: 32px; }
   .right { height: auto; }
@@ -310,5 +450,29 @@ const base = import.meta.env.BASE_URL
   .frame { padding: 20px 30px; }
   .facts { flex-wrap: wrap; gap: 20px; }
   .steps { grid-template-columns: 1fr; }
+  .v-mark { display: none; }
+}
+
+/* ═════════ Reduced motion ═════════ */
+
+@media (prefers-reduced-motion: reduce) {
+  .about:not(.is-visible) .top,
+  .about:not(.is-visible) .kicker-small,
+  .about:not(.is-visible) .title,
+  .about:not(.is-visible) .lead,
+  .about:not(.is-visible) .facts,
+  .about:not(.is-visible) .right,
+  .about:not(.is-visible) .shot,
+  .about:not(.is-visible) .caption,
+  .about:not(.is-visible) .bottom,
+  .about:not(.is-visible) .step,
+  .about:not(.is-visible) .v-mark,
+  .about:not(.is-visible) .rule {
+    opacity: 1;
+  }
+  .about.is-visible *,
+  .kicker-small::before {
+    animation: none !important;
+  }
 }
 </style>

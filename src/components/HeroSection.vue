@@ -1,8 +1,25 @@
 <script setup>
+import { ref, onMounted, onBeforeUnmount } from 'vue'
+
+const root = ref(null)
+const visible = ref(false)
+let observer
+
+onMounted(() => {
+  observer = new IntersectionObserver(([entry]) => {
+    if (entry.isIntersecting) {
+      visible.value = true
+      observer.disconnect()
+    }
+  }, { threshold: 0.2 })
+  observer.observe(root.value)
+})
+
+onBeforeUnmount(() => observer?.disconnect())
 </script>
 
 <template>
-  <section class="hero">
+  <section ref="root" class="hero" :class="{ 'is-visible': visible }">
     <div class="frame">
       <header class="top">
         <span class="page">01</span>
@@ -33,13 +50,20 @@
         </div>
       </div>
 
- <div class="meta">
-  <p class="est">ООО «Честный эколог»</p>
-  <p class="tags">ОГРН 1217700015158 · ИНН 9729304028</p>
-  <p class="city">+7 (991) 591-77-78</p>
-</div>
+      <div class="meta">
+        <div class="note note--meta">
+          <span class="dot"></span>
+          <span class="line"></span>
+          <div class="body">
+            <span class="label">Организация</span>
+            <span class="text">ООО «Честный эколог»</span>
+          </div>
+        </div>
+        <p class="tags">ОГРН 1217700015158 · ИНН 9729304028</p>
+        <p class="city">+7 (991) 591-77-78</p>
+      </div>
 
-<p class="copy">© 2026 · info@ecohonest.ru</p>
+      <p class="copy">© 2026 · info@ecohonest.ru</p>
 
       <span class="v-mark">Ecohonest · 2026</span>
     </div>
@@ -64,6 +88,66 @@
   flex-direction: column;
   justify-content: space-between;
 }
+
+/* ============ Entrance animations ============ */
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(18px); filter: blur(6px); }
+  to   { opacity: 1; transform: translateY(0);    filter: blur(0); }
+}
+
+@keyframes fade-right {
+  from { opacity: 0; transform: translateX(-18px); filter: blur(6px); }
+  to   { opacity: 1; transform: translateX(0);     filter: blur(0); }
+}
+
+@keyframes fade-left {
+  from { opacity: 0; transform: translateX(18px); filter: blur(6px); }
+  to   { opacity: 1; transform: translateX(0);    filter: blur(0); }
+}
+
+@keyframes title-reveal {
+  from { opacity: 0; transform: translateY(32px); filter: blur(14px); }
+  to   { opacity: 1; transform: translateY(0);    filter: blur(0); }
+}
+
+@keyframes rule-grow {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+@keyframes v-mark-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Hidden until section enters viewport */
+.hero:not(.is-visible) .frame > *,
+.hero:not(.is-visible) .rule {
+  opacity: 0;
+}
+
+/* Trigger cascade once visible */
+.hero.is-visible .frame > * {
+  animation: fade-up 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.hero.is-visible .top         { animation-name: fade-right; animation-delay: 0.10s; }
+.hero.is-visible .note--air   { animation-delay: 0.35s; }
+.hero.is-visible .title-group { animation-delay: 0.45s; }
+.hero.is-visible h1           { animation: title-reveal 1.1s cubic-bezier(0.22, 1, 0.36, 1) 0.45s both; }
+.hero.is-visible .subtitle    { animation: fade-up 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.75s both; }
+.hero.is-visible .note--sub   { animation-delay: 0.95s; }
+.hero.is-visible .meta        { animation-name: fade-left; animation-delay: 1.05s; }
+.hero.is-visible .copy        { animation-delay: 1.20s; }
+.hero.is-visible .v-mark      { animation: v-mark-in 1.4s ease-out 0.20s both; }
+
+.hero.is-visible .rule {
+  transform-origin: left center;
+  animation: rule-grow 1.1s cubic-bezier(0.22, 1, 0.36, 1) 0.35s both;
+}
+
+/* ============ Layout ============ */
 
 .top {
   display: flex;
@@ -104,6 +188,21 @@
   border-radius: 50%;
   background: #a4c47a;
   flex-shrink: 0;
+  animation: dot-pulse 2s ease-in-out infinite;
+}
+
+.note--sub .dot  { animation-delay: 0.6s; }
+.note--meta .dot { animation-delay: 1.2s; }
+
+@keyframes dot-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(164, 196, 122, 0.55);
+    opacity: 1;
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(164, 196, 122, 0);
+    opacity: 0.75;
+  }
 }
 
 .line {
@@ -158,6 +257,7 @@ h1 {
   line-height: 0.9;
   color: #8b8578;
   font-family: Georgia, "Times New Roman", serif;
+  margin-left: -0.05em;
 }
 
 .accent {
@@ -180,12 +280,17 @@ h1 {
   text-align: right;
 }
 
-.est,
-.city {
-  font-size: 12px;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: rgba(238, 241, 232, 0.9);
+.note--meta {
+  display: inline-flex;
+  margin-bottom: 14px;
+}
+
+.note--meta .body {
+  align-items: flex-end;
+}
+
+.note--meta .text {
+  text-align: right;
 }
 
 .tags {
@@ -198,6 +303,9 @@ h1 {
 
 .city {
   margin-top: 6px;
+  font-size: 12px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
   color: #a4c47a;
 }
 
@@ -213,5 +321,22 @@ h1 {
   text-transform: uppercase;
   color: rgba(238, 241, 232, 0.4);
   white-space: nowrap;
+}
+
+/* ============ Reduced motion ============ */
+
+@media (prefers-reduced-motion: reduce) {
+  .hero:not(.is-visible) .frame > *,
+  .hero:not(.is-visible) .rule {
+    opacity: 1;
+  }
+  .hero.is-visible .frame > *,
+  .hero.is-visible .rule,
+  .hero.is-visible h1,
+  .hero.is-visible .subtitle,
+  .hero.is-visible .v-mark,
+  .dot {
+    animation: none !important;
+  }
 }
 </style>

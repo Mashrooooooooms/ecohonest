@@ -1,32 +1,79 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
+
+const ACCESS_KEY = 'b1130200-2539-44ae-8011-1513b5efff9e'
 
 const name = ref('')
 const phone = ref('')
 const topic = ref('')
 const sent = ref(false)
-const ready = ref(false)
+const sending = ref(false)
+const error = ref('')
+
+const root = ref(null)
+const visible = ref(false)
+let observer
 
 onMounted(() => {
-  requestAnimationFrame(() => requestAnimationFrame(() => (ready.value = true)))
+  observer = new IntersectionObserver(([entry]) => {
+    if (entry.isIntersecting) {
+      visible.value = true
+      observer.disconnect()
+    }
+  }, { threshold: 0.2 })
+  observer.observe(root.value)
 })
 
-function submit() {
-  sent.value = true
+onBeforeUnmount(() => observer?.disconnect())
+
+async function submit() {
+  sending.value = true
+  error.value = ''
+
+  const res = await fetch('https://api.web3forms.com/submit', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    },
+    body: JSON.stringify({
+      access_key: ACCESS_KEY,
+      subject: `Заявка от ${name.value || 'без имени'}`,
+      from_name: 'Ecohonest — сайт',
+      name: name.value,
+      phone: phone.value,
+      topic: topic.value
+    })
+  })
+
+  const data = await res.json()
+  sending.value = false
+
+  if (data.success) {
+    sent.value = true
+    name.value = ''
+    phone.value = ''
+    topic.value = ''
+  } else {
+    error.value = data.message || 'Не удалось отправить. Попробуйте ещё раз.'
+  }
+}
+
+function reset() {
+  sent.value = false
+  error.value = ''
 }
 </script>
 
 <template>
-  <section class="page" :class="{ ready }">
+  <section ref="root" class="contact" :class="{ 'is-visible': visible }">
     <div class="photo"></div>
     <div class="shade"></div>
 
-    <header class="masthead fade" style="--d:.05s">
-      <span class="brand">Ecohonest</span>
-      <span class="dot">◦</span>
-      <span class="mid">- 05 - / Form</span>
-      <span class="dot">◦</span>
-      <span class="right">Moscow — MMXXVI</span>
+    <header class="top">
+      <span class="pg">05</span>
+      <span class="rule"></span>
+      <span class="kicker">Заявка · Консультация · Связь</span>
     </header>
 
     <main class="body">
@@ -34,27 +81,27 @@ function submit() {
         <span class="ghost" aria-hidden="true">05</span>
 
         <div class="stack">
-          <p class="kicker fade" style="--d:.15s">
-            <span class="rule"></span>
+          <p class="kicker-small">
+            <span class="rule-line"></span>
             <span>Заявка / Consultation</span>
           </p>
 
           <h1 class="title">
             <span class="mask">
-              <span class="word rise" style="--d:.28s">Оставьте</span>
+              <span class="word rise">Оставьте</span>
             </span>
             <span class="mask">
-              <span class="word rise word--accent" style="--d:.44s">заявку</span>
+              <span class="word rise word--accent">заявку</span>
             </span>
           </h1>
 
-          <p class="lead fade" style="--d:.62s">
+          <p class="lead">
             Первая консультация бесплатна. Ответим
             в&nbsp;течение рабочего дня и&nbsp;предложим сроки.
           </p>
         </div>
 
-        <ul class="meta fade" style="--d:.8s">
+        <ul class="meta">
           <li>
             <span class="m-n">I</span>
             <span class="m-k">Телефон</span>
@@ -74,57 +121,52 @@ function submit() {
       </div>
 
       <div class="right">
-        <div class="divider fade" style="--d:.4s"></div>
+        <div class="divider"></div>
 
         <form v-if="!sent" class="form" @submit.prevent="submit">
-          <div class="form-top fade" style="--d:.3s">
+          <div class="form-top">
             <span>Заполните форму</span>
             <span class="cnt">01 / 01</span>
           </div>
 
-          <label class="field fade" style="--d:.4s">
+          <label class="field">
             <span class="f-num">01</span>
             <span class="f-label">Имя</span>
             <input v-model="name" type="text" placeholder="—" required>
           </label>
 
-          <label class="field fade" style="--d:.5s">
+          <label class="field">
             <span class="f-num">02</span>
             <span class="f-label">Телефон</span>
             <input v-model="phone" type="tel" placeholder="—" required>
           </label>
 
-          <label class="field field--area fade" style="--d:.6s">
+          <label class="field field--area">
             <span class="f-num">03</span>
             <span class="f-label">Задача</span>
             <textarea v-model="topic" rows="2" placeholder="—"></textarea>
           </label>
 
-          <button class="send fade" style="--d:.72s" type="submit">
+          <button class="send" type="submit" :disabled="sending">
             <span class="send-bg"></span>
-            <span class="send-text">Отправить заявку</span>
+            <span class="send-text">{{ sending ? 'Отправка…' : 'Отправить заявку' }}</span>
             <span class="send-arrow">→</span>
           </button>
 
-          <p class="note fade" style="--d:.82s">
+          <p v-if="error" class="error">{{ error }}</p>
+
+          <p class="note">
             Отправка = согласие с&nbsp;обработкой персональных данных.
           </p>
         </form>
 
         <div v-else class="done">
-          <span class="done-mark rise" style="--d:.05s">✓</span>
-          <p class="done-title rise" style="--d:.15s">
-            Заявка<br>принята
-          </p>
-          <p class="done-sub fade" style="--d:.4s">
+          <span class="done-mark">✓</span>
+          <p class="done-title">Заявка<br>принята</p>
+          <p class="done-sub">
             Свяжемся с&nbsp;вами в&nbsp;течение рабочего дня.
           </p>
-          <button
-            class="send send--alt fade"
-            style="--d:.5s"
-            type="button"
-            @click="sent = false"
-          >
+          <button class="send send--alt" type="button" @click="reset">
             <span class="send-bg"></span>
             <span class="send-text">Новая заявка</span>
             <span class="send-arrow">→</span>
@@ -133,16 +175,12 @@ function submit() {
       </div>
     </main>
 
-    <footer class="colophon fade" style="--d:.9s">
-      <span>Ecohonest Studio</span>
-      <span>Ecological&nbsp;Audit — 2026</span>
-      <span>+7 991 591 77 78</span>
-    </footer>
+    <span class="v-mark">Ecohonest · 2026</span>
   </section>
 </template>
 
 <style scoped>
-.page {
+.contact {
   --bg:      #070e1a;
   --fg:      #f0f5fc;
   --muted:   rgba(240, 245, 252, 0.7);
@@ -154,7 +192,7 @@ function submit() {
   position: relative;
   height: 100vh;
   display: grid;
-  grid-template-rows: 64px 1fr 60px;
+  grid-template-rows: 64px 1fr;
   color: var(--fg);
   background: var(--bg);
   font-family: Georgia, "Times New Roman", serif;
@@ -173,8 +211,6 @@ function submit() {
   animation: photoIn 20s ease-out both;
 }
 
-/* затемнение: слева плотно под текст, справа глубже под форму,
-   но фото остаётся видимым по краям и в световых пятнах */
 .shade {
   position: absolute;
   inset: 0;
@@ -189,7 +225,6 @@ function submit() {
       rgba(7, 14, 26, 0.6) 61.5%,
       rgba(7, 14, 26, 0.74) 100%
     ),
-    /* мягкое затемнение сверху и снизу — фокус в центре */
     radial-gradient(
       130% 95% at 50% 50%,
       rgba(0, 0, 0, 0) 40%,
@@ -202,26 +237,37 @@ function submit() {
   to   { transform: scale(1.02) translate3d(0, 0, 0); }
 }
 
-/* ─── верхняя линейка ─── */
-.masthead {
+/* ─── шапка ─── */
+.top {
   position: relative;
   z-index: 2;
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: 16px;
   padding: 0 40px;
-  font-family: system-ui, -apple-system, "Inter", sans-serif;
-  font-size: 10px;
-  letter-spacing: 0.34em;
-  text-transform: uppercase;
-  color: var(--muted);
-  border-bottom: 1px solid var(--hair);
+  font-family: system-ui, -apple-system, sans-serif;
   text-shadow: 0 1px 12px rgba(0, 0, 0, 0.85);
 }
-.brand { color: var(--fg); font-weight: 500; }
-.dot   { color: var(--accent-d); font-size: 14px; line-height: 1; }
-.mid   { color: var(--accent); }
-.right { margin-left: auto; }
+
+.pg {
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: var(--accent);
+}
+
+.rule {
+  flex: 1;
+  height: 1px;
+  background: rgba(240, 245, 252, 0.4);
+  transform-origin: left center;
+}
+
+.kicker {
+  font-size: 10px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: rgba(240, 245, 252, 0.9);
+}
 
 /* ─── разворот 7/5 ─── */
 .body {
@@ -242,8 +288,6 @@ function submit() {
   min-width: 0;
 }
 
-/* локальный скрим под текстовым блоком — гарантирует контраст
-   поверх любых световых пятен фотографии */
 .left::before {
   content: "";
   position: absolute;
@@ -291,33 +335,28 @@ function submit() {
   max-width: 620px;
 }
 
-.kicker {
+.kicker-small {
   display: flex;
   align-items: center;
   gap: 16px;
   margin: 0;
-  font-family: system-ui, -apple-system, "Inter", sans-serif;
+  font-family: system-ui, -apple-system, sans-serif;
   font-size: 10px;
   letter-spacing: 0.44em;
   text-transform: uppercase;
   color: var(--muted);
   text-shadow: 0 1px 16px rgba(0, 0, 0, 0.9);
 }
-.kicker .rule {
+
+.rule-line {
   display: block;
   width: 60px;
   height: 1px;
   background: var(--accent);
   transform-origin: left center;
   box-shadow: 0 0 12px rgba(106, 151, 255, 0.55);
-  animation: ruleGrow 1.2s cubic-bezier(.2, .9, .25, 1) .45s both;
-}
-@keyframes ruleGrow {
-  from { transform: scaleX(0); }
-  to   { transform: scaleX(1); }
 }
 
-/* заголовок — усиленные тени, чтобы держал контраст */
 .title {
   margin: 0;
   font-size: clamp(72px, 8.6vw, 168px);
@@ -325,6 +364,7 @@ function submit() {
   line-height: 0.84;
   letter-spacing: -0.055em;
   color: var(--fg);
+  margin-left: -0.055em;
   text-shadow:
     0 1px 2px rgba(0, 0, 0, 0.9),
     0 4px 24px rgba(0, 0, 0, 0.85),
@@ -341,7 +381,7 @@ function submit() {
 }
 .word--accent {
   color: var(--accent);
-  font-style: italic;
+  font-style: normal;
   text-shadow:
     0 1px 2px rgba(0, 0, 0, 0.9),
     0 4px 24px rgba(0, 0, 0, 0.8),
@@ -360,7 +400,6 @@ function submit() {
     0 2px 18px rgba(0, 0, 0, 0.9);
 }
 
-/* контакты */
 .meta {
   position: relative;
   list-style: none;
@@ -378,7 +417,7 @@ function submit() {
   gap: 16px;
   padding: 12px 0;
   border-bottom: 1px solid var(--hair);
-  font-family: system-ui, -apple-system, "Inter", sans-serif;
+  font-family: system-ui, -apple-system, sans-serif;
   font-size: 11px;
   letter-spacing: 0.08em;
 }
@@ -444,12 +483,7 @@ function submit() {
   );
   opacity: 0.75;
   transform-origin: center top;
-}
-.divider.anim { transform: scaleY(0); }
-.ready .divider { animation: lineDrop 1.2s cubic-bezier(.2, .9, .25, 1) both; }
-@keyframes lineDrop {
-  from { transform: scaleY(0); }
-  to   { transform: scaleY(1); }
+  transform: scaleY(0);
 }
 
 .form,
@@ -467,7 +501,7 @@ function submit() {
   padding-bottom: 20px;
   margin-bottom: 6px;
   border-bottom: 1px solid var(--hair);
-  font-family: system-ui, -apple-system, "Inter", sans-serif;
+  font-family: system-ui, -apple-system, sans-serif;
   font-size: 10px;
   letter-spacing: 0.34em;
   text-transform: uppercase;
@@ -483,7 +517,7 @@ function submit() {
   gap: 16px;
   padding: 16px 0;
   border-bottom: 1px solid var(--hair);
-  font-family: system-ui, -apple-system, "Inter", sans-serif;
+  font-family: system-ui, -apple-system, sans-serif;
   transition: border-color 0.35s ease;
 }
 .field--area { align-items: start; padding-top: 18px; }
@@ -544,7 +578,7 @@ function submit() {
   background: transparent;
   border: 1px solid rgba(240, 245, 252, 0.36);
   color: var(--fg);
-  font-family: system-ui, -apple-system, "Inter", sans-serif;
+  font-family: system-ui, -apple-system, sans-serif;
   font-size: 11px;
   font-weight: 500;
   letter-spacing: 0.36em;
@@ -553,7 +587,12 @@ function submit() {
   overflow: hidden;
   isolation: isolate;
   text-shadow: 0 1px 14px rgba(0, 0, 0, 0.9);
-  transition: color 0.4s ease, border-color 0.4s ease;
+  transition: color 0.4s ease, border-color 0.4s ease, opacity 0.3s ease;
+}
+
+.send:disabled {
+  cursor: wait;
+  opacity: 0.6;
 }
 
 .send-bg {
@@ -569,24 +608,34 @@ function submit() {
   position: relative;
   transition: transform 0.5s cubic-bezier(.2, .9, .25, 1);
 }
-.send:hover {
+.send:hover:not(:disabled) {
   color: #061224;
   border-color: var(--accent);
   text-shadow: none;
 }
-.send:hover .send-bg { transform: translateX(0); }
-.send:hover .send-arrow { transform: translateX(10px); }
+.send:hover:not(:disabled) .send-bg { transform: translateX(0); }
+.send:hover:not(:disabled) .send-arrow { transform: translateX(10px); }
 
 .send-arrow { font-size: 16px; line-height: 1; }
 .send--alt { margin-top: 20px; }
 
 .note {
   margin: 18px 0 0;
-  font-family: system-ui, -apple-system, "Inter", sans-serif;
+  font-family: system-ui, -apple-system, sans-serif;
   font-size: 10px;
   letter-spacing: 0.06em;
   line-height: 1.6;
   color: var(--muted);
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.9);
+}
+
+.error {
+  margin: 12px 0 0;
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  line-height: 1.5;
+  color: #ff8a7a;
   text-shadow: 0 1px 12px rgba(0, 0, 0, 0.9);
 }
 
@@ -623,56 +672,105 @@ function submit() {
   text-shadow: 0 2px 16px rgba(0, 0, 0, 0.9);
 }
 
-/* ─── нижняя линейка ─── */
-.colophon {
-  position: relative;
+/* ─── водяной знак ─── */
+.v-mark {
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: rotate(-90deg) translateX(-50%);
+  transform-origin: left center;
   z-index: 2;
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  align-items: center;
-  padding: 0 40px;
-  border-top: 1px solid var(--hair);
-  font-family: system-ui, -apple-system, "Inter", sans-serif;
+  font-family: system-ui, sans-serif;
   font-size: 10px;
-  letter-spacing: 0.34em;
+  letter-spacing: 0.35em;
   text-transform: uppercase;
-  color: var(--muted);
-  text-shadow: 0 1px 14px rgba(0, 0, 0, 0.9);
-}
-.colophon span:nth-child(2) { text-align: center; }
-.colophon span:nth-child(3) {
-  text-align: right;
-  color: rgba(240, 245, 252, 0.92);
+  color: rgba(240, 245, 252, 0.4);
+  white-space: nowrap;
+  pointer-events: none;
 }
 
-/* ─── анимации ─── */
-.fade { opacity: 0; }
-.ready .fade {
-  animation: fadeUp 1s cubic-bezier(.2, .9, .25, 1) both;
-  animation-delay: var(--d, 0s);
-}
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(16px); }
-  to   { opacity: 1; transform: translateY(0); }
+/* ═════════ Entrance animations ═════════ */
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(18px); filter: blur(6px); }
+  to   { opacity: 1; transform: translateY(0);    filter: blur(0); }
 }
 
-.word.rise { transform: translateY(110%); }
-.ready .word.rise {
-  animation: wordRise 1.15s cubic-bezier(.2, .9, .25, 1) both;
-  animation-delay: var(--d, .3s);
+@keyframes fade-right {
+  from { opacity: 0; transform: translateX(-18px); filter: blur(6px); }
+  to   { opacity: 1; transform: translateX(0);     filter: blur(0); }
 }
-@keyframes wordRise {
+
+@keyframes title-reveal {
+  from { opacity: 0; transform: translateY(32px); filter: blur(14px); }
+  to   { opacity: 1; transform: translateY(0);    filter: blur(0); }
+}
+
+@keyframes rule-grow {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+@keyframes line-drop {
+  from { transform: scaleY(0); }
+  to   { transform: scaleY(1); }
+}
+
+@keyframes v-mark-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes word-rise {
   from { transform: translateY(110%); }
   to   { transform: translateY(0); }
 }
 
-.done-mark.rise,
-.done-title.rise { transform: translateY(24px); opacity: 0; }
-.ready .done-mark.rise,
-.ready .done-title.rise {
-  animation: fadeUp 0.9s cubic-bezier(.2, .9, .25, 1) both;
-  animation-delay: var(--d, 0s);
+.contact:not(.is-visible) .top,
+.contact:not(.is-visible) .rule,
+.contact:not(.is-visible) .kicker,
+.contact:not(.is-visible) .kicker-small,
+.contact:not(.is-visible) .title,
+.contact:not(.is-visible) .word,
+.contact:not(.is-visible) .lead,
+.contact:not(.is-visible) .meta,
+.contact:not(.is-visible) .divider,
+.contact:not(.is-visible) .form-top,
+.contact:not(.is-visible) .field,
+.contact:not(.is-visible) .send,
+.contact:not(.is-visible) .note,
+.contact:not(.is-visible) .done-mark,
+.contact:not(.is-visible) .done-title,
+.contact:not(.is-visible) .done-sub,
+.contact:not(.is-visible) .v-mark {
+  opacity: 0;
 }
+
+.contact.is-visible .top          { animation: fade-right 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.05s both; }
+.contact.is-visible .rule         { animation: rule-grow 1.1s cubic-bezier(0.22, 1, 0.36, 1) 0.25s both; }
+.contact.is-visible .kicker       { animation: fade-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both; }
+
+.contact.is-visible .kicker-small { animation: fade-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.35s both; }
+.contact.is-visible .rule-line    { animation: rule-grow 1.1s cubic-bezier(0.22, 1, 0.36, 1) 0.55s both; }
+.contact.is-visible .title        { animation: title-reveal 1.1s cubic-bezier(0.22, 1, 0.36, 1) 0.55s both; }
+.contact.is-visible .word         { animation: word-rise 1.15s cubic-bezier(0.2, 0.9, 0.25, 1) 0.65s both; }
+.contact.is-visible .mask:nth-of-type(2) .word { animation-delay: 0.80s; }
+.contact.is-visible .lead         { animation: fade-up 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.95s both; }
+.contact.is-visible .meta         { animation: fade-up 0.9s cubic-bezier(0.22, 1, 0.36, 1) 1.10s both; }
+
+.contact.is-visible .divider      { animation: line-drop 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.45s both; }
+.contact.is-visible .form-top     { animation: fade-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.55s both; }
+.contact.is-visible .field:nth-of-type(1) { animation: fade-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.70s both; }
+.contact.is-visible .field:nth-of-type(2) { animation: fade-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.80s both; }
+.contact.is-visible .field:nth-of-type(3) { animation: fade-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.90s both; }
+.contact.is-visible .send         { animation: fade-up 0.9s cubic-bezier(0.22, 1, 0.36, 1) 1.05s both; }
+.contact.is-visible .note         { animation: fade-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) 1.20s both; }
+
+.contact.is-visible .done-mark    { animation: fade-up 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.05s both; }
+.contact.is-visible .done-title   { animation: title-reveal 1.0s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both; }
+.contact.is-visible .done-sub     { animation: fade-up 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.40s both; }
+
+.contact.is-visible .v-mark       { animation: v-mark-in 1.4s ease-out 0.15s both; }
 
 /* ─── адаптив ─── */
 @media (max-width: 1200px) {
@@ -683,8 +781,8 @@ function submit() {
 }
 
 @media (max-width: 960px) {
-  .page {
-    grid-template-rows: auto auto auto auto;
+  .contact {
+    grid-template-rows: 64px auto;
     height: auto;
     min-height: 100vh;
   }
@@ -711,15 +809,13 @@ function submit() {
     height: 1px;
     background: linear-gradient(90deg, transparent, var(--accent), transparent);
     transform-origin: left center;
+    transform: scaleY(1) scaleX(0);
   }
-  .ready .divider { animation: lineDrop 1.2s cubic-bezier(.2, .9, .25, 1) both; }
-  @keyframes lineDrop {
-    from { transform: scaleX(0); }
-    to   { transform: scaleX(1); }
+  .contact.is-visible .divider {
+    animation: rule-grow 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.45s both;
   }
   .ghost { display: none; }
 
-  /* на мобильном фото затемняется сверху вниз */
   .shade {
     background:
       linear-gradient(
@@ -737,14 +833,9 @@ function submit() {
 }
 
 @media (max-width: 640px) {
-  .masthead,
-  .colophon {
-    padding: 0 20px;
-    font-size: 9px;
-    letter-spacing: 0.22em;
-  }
-  .masthead { flex-wrap: wrap; gap: 8px; padding-top: 14px; padding-bottom: 14px; }
-  .masthead .right { margin-left: 0; }
+  .top { padding: 0 20px; gap: 12px; }
+  .pg, .kicker { font-size: 9px; }
+  .kicker { letter-spacing: 0.2em; }
 
   .left  { padding: 36px 22px 40px; }
   .right { padding: 40px 22px 56px; }
@@ -765,35 +856,39 @@ function submit() {
     padding-top: 4px;
   }
 
-  .colophon {
-    grid-template-columns: 1fr;
-    gap: 4px;
-    text-align: left;
-    padding: 14px 20px;
-  }
-  .colophon span { text-align: left !important; }
-
   .done-title { font-size: 42px; }
+
+  .v-mark { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .photo,
   .ghost,
-  .kicker .rule,
-  .fade,
-  .word.rise,
-  .divider,
-  .done-mark.rise,
-  .done-title.rise {
+  .contact.is-visible *,
+  .contact.is-visible .mask:nth-of-type(2) .word {
     animation: none !important;
     transition: none !important;
   }
-  .fade,
-  .word.rise,
-  .done-mark.rise,
-  .done-title.rise {
-    opacity: 1 !important;
-    transform: none !important;
+  .contact:not(.is-visible) .top,
+  .contact:not(.is-visible) .rule,
+  .contact:not(.is-visible) .kicker,
+  .contact:not(.is-visible) .kicker-small,
+  .contact:not(.is-visible) .title,
+  .contact:not(.is-visible) .word,
+  .contact:not(.is-visible) .lead,
+  .contact:not(.is-visible) .meta,
+  .contact:not(.is-visible) .divider,
+  .contact:not(.is-visible) .form-top,
+  .contact:not(.is-visible) .field,
+  .contact:not(.is-visible) .send,
+  .contact:not(.is-visible) .note,
+  .contact:not(.is-visible) .done-mark,
+  .contact:not(.is-visible) .done-title,
+  .contact:not(.is-visible) .done-sub,
+  .contact:not(.is-visible) .v-mark {
+    opacity: 1;
   }
+  .contact.is-visible .divider { transform: scaleY(1); }
+  .word { transform: none; }
 }
 </style>

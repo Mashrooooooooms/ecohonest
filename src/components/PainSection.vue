@@ -1,5 +1,23 @@
 <script setup>
+import { ref, onMounted, onBeforeUnmount } from 'vue'
+
 defineProps({ isActive: { type: Boolean, default: true } })
+
+const entered = ref(false)
+const root = ref(null)
+let observer
+
+onMounted(() => {
+  observer = new IntersectionObserver(([entry]) => {
+    if (entry.isIntersecting) {
+      entered.value = true
+      observer.disconnect()
+    }
+  }, { threshold: 0.2 })
+  observer.observe(root.value)
+})
+
+onBeforeUnmount(() => observer?.disconnect())
 
 const risks = [
   { code: '8.2 ч.3.4', text: 'Обращение с отходами, повтор', sum: '150–200 тыс. ₽', stop: '—' },
@@ -36,7 +54,7 @@ const tickerItems = [
 </script>
 
 <template>
-  <section class="pain" :class="{ 'pain--in': isActive }">
+  <section ref="root" class="pain" :class="{ 'pain--in': isActive || entered }">
     <div class="vignette"></div>
 
     <div class="ticker ticker--top">
@@ -58,7 +76,7 @@ const tickerItems = [
           <h2>
             Цена<br />
             <em>ошибки</em><br />
-            в строке
+            &nbsp;
           </h2>
 
           <p class="lead">
@@ -102,7 +120,7 @@ const tickerItems = [
       </div>
 
       <footer class="bottom">
-        <div class="block">
+        <div class="block block--cases">
           <span class="block-head">Судебная практика</span>
           <ul class="cases">
             <li v-for="c in cases" :key="c.date" class="case">
@@ -113,7 +131,7 @@ const tickerItems = [
           </ul>
         </div>
 
-        <div class="block">
+        <div class="block block--dates">
           <span class="block-head">Сроки отчётности</span>
           <ul class="dates">
             <li v-for="d in deadlines" :key="d.d" class="date">
@@ -124,6 +142,8 @@ const tickerItems = [
           <p class="fine">Декларация НВОС — п. 8 ст. 16.4 ФЗ № 7-ФЗ. Экосбор — ст. 24.5 ФЗ № 89-ФЗ. Просрочка = ст. 8.41 / 8.41.1 КоАП.</p>
         </div>
       </footer>
+
+      <span class="v-mark">Ecohonest · 2026</span>
     </div>
 
     <div class="ticker ticker--bottom">
@@ -154,17 +174,6 @@ const tickerItems = [
   box-sizing: border-box;
 }
 
-.pain:not(.pain--in) {
-  opacity: 0;
-  transform: translateY(24px);
-}
-
-.pain.pain--in {
-  opacity: 1;
-  transform: translateY(0);
-  transition: opacity 0.9s ease, transform 0.9s ease;
-}
-
 .vignette {
   position: absolute;
   inset: 0;
@@ -177,6 +186,78 @@ const tickerItems = [
   pointer-events: none;
   z-index: 0;
 }
+
+/* ═════════ Entrance animations ═════════ */
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(18px); filter: blur(6px); }
+  to   { opacity: 1; transform: translateY(0);    filter: blur(0); }
+}
+
+@keyframes fade-right {
+  from { opacity: 0; transform: translateX(-18px); filter: blur(6px); }
+  to   { opacity: 1; transform: translateX(0);     filter: blur(0); }
+}
+
+@keyframes title-reveal {
+  from { opacity: 0; transform: translateY(32px); filter: blur(14px); }
+  to   { opacity: 1; transform: translateY(0);    filter: blur(0); }
+}
+
+@keyframes rule-grow {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+@keyframes v-mark-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes ticker-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.pain:not(.pain--in) .top,
+.pain:not(.pain--in) .rule,
+.pain:not(.pain--in) .kicker,
+.pain:not(.pain--in) h2,
+.pain:not(.pain--in) .lead,
+.pain:not(.pain--in) .meta,
+.pain:not(.pain--in) .thead,
+.pain:not(.pain--in) .tr,
+.pain:not(.pain--in) .block,
+.pain:not(.pain--in) .v-mark,
+.pain:not(.pain--in) .ticker {
+  opacity: 0;
+}
+
+.pain.pain--in .ticker        { animation: ticker-in 1.2s ease-out both; }
+.pain.pain--in .top           { animation: fade-right 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.05s both; }
+.pain.pain--in .rule          { transform-origin: left center; animation: rule-grow 1.1s cubic-bezier(0.22, 1, 0.36, 1) 0.25s both; }
+
+.pain.pain--in h2             { animation: title-reveal 1.1s cubic-bezier(0.22, 1, 0.36, 1) 0.35s both; }
+.pain.pain--in .lead          { animation: fade-up 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.60s both; }
+.pain.pain--in .meta          { animation: fade-up 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.78s both; }
+
+.pain.pain--in .thead         { animation: fade-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.42s both; }
+.pain.pain--in .tr:nth-child(2)  { animation: fade-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.52s both; }
+.pain.pain--in .tr:nth-child(3)  { animation: fade-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.57s both; }
+.pain.pain--in .tr:nth-child(4)  { animation: fade-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.62s both; }
+.pain.pain--in .tr:nth-child(5)  { animation: fade-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.67s both; }
+.pain.pain--in .tr:nth-child(6)  { animation: fade-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.72s both; }
+.pain.pain--in .tr:nth-child(7)  { animation: fade-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.77s both; }
+.pain.pain--in .tr:nth-child(8)  { animation: fade-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.82s both; }
+.pain.pain--in .tr:nth-child(9)  { animation: fade-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.87s both; }
+.pain.pain--in .tr:nth-child(10) { animation: fade-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.92s both; }
+
+.pain.pain--in .block--cases  { animation: fade-up 0.9s cubic-bezier(0.22, 1, 0.36, 1) 1.00s both; }
+.pain.pain--in .block--dates  { animation: fade-up 0.9s cubic-bezier(0.22, 1, 0.36, 1) 1.15s both; }
+
+.pain.pain--in .v-mark        { animation: v-mark-in 1.4s ease-out 0.15s both; }
+
+/* ═════════ Layout ═════════ */
 
 .ticker {
   position: relative;
@@ -257,10 +338,11 @@ h2 {
   letter-spacing: -0.045em;
   line-height: 0.9;
   color: #f5ece2;
+  margin-left: -0.045em;
 }
 
 h2 em {
-  font-style: italic;
+  font-style: normal;
   color: #e87a35;
 }
 
@@ -390,7 +472,7 @@ h2 em {
   color: #e87a35;
 }
 
-.cases { display: flex; flex-direction: column; gap: 6px; }
+.cases { display: flex; flex-direction: column; gap: 6px; list-style: none; margin: 0; padding: 0; }
 
 .case {
   display: grid;
@@ -420,7 +502,7 @@ h2 em {
   white-space: nowrap;
 }
 
-.dates { display: flex; gap: 22px; flex-wrap: wrap; }
+.dates { display: flex; gap: 22px; flex-wrap: wrap; list-style: none; margin: 0; padding: 0; }
 
 .date { display: flex; flex-direction: column; gap: 2px; font-family: system-ui, sans-serif; }
 
@@ -446,6 +528,21 @@ h2 em {
   margin-top: 4px;
 }
 
+.v-mark {
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: rotate(-90deg) translateX(-50%);
+  transform-origin: left center;
+  font-family: system-ui, sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: rgba(245, 236, 226, 0.4);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
 @media (max-width: 1200px) {
   .body { grid-template-columns: 1fr; gap: 20px; }
   .bottom { grid-template-columns: 1fr; gap: 14px; }
@@ -457,5 +554,29 @@ h2 em {
   .td-stop, .thead span:last-child { display: none; }
   .dates { gap: 16px; }
   .case { grid-template-columns: 78px minmax(0, 1fr) 92px; }
+}
+
+@media (max-width: 700px) {
+  .v-mark { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pain:not(.pain--in) .top,
+  .pain:not(.pain--in) .rule,
+  .pain:not(.pain--in) .kicker,
+  .pain:not(.pain--in) h2,
+  .pain:not(.pain--in) .lead,
+  .pain:not(.pain--in) .meta,
+  .pain:not(.pain--in) .thead,
+  .pain:not(.pain--in) .tr,
+  .pain:not(.pain--in) .block,
+  .pain:not(.pain--in) .v-mark,
+  .pain:not(.pain--in) .ticker {
+    opacity: 1;
+  }
+  .pain.pain--in *,
+  .ticker-track {
+    animation: none !important;
+  }
 }
 </style>

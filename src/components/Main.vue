@@ -28,8 +28,8 @@ function goTo(i) {
     <div ref="container" class="scroll" @scroll="onScroll">
       <section class="slide"><HeroSection /></section>
       <section class="slide"><AboutSection /></section>
-      <section class="slide"><ServicesSection :is-active="active === 2" /></section>
-      <section class="slide"><PainSection :is-active="active === 3" /></section>
+      <section class="slide"><PainSection :is-active="active === 2" /></section>
+      <section class="slide"><ServicesSection :is-active="active === 3" /></section>
       <section class="slide"><OrderSection /></section>
       <section class="slide"><ContactsSection /></section>
     </div>
