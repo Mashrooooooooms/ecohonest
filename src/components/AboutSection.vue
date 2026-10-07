@@ -150,11 +150,6 @@ onBeforeUnmount(() => observer?.disconnect())
   to   { opacity: 1; transform: translateX(0);     filter: blur(0); }
 }
 
-@keyframes fade-left {
-  from { opacity: 0; transform: translateX(24px); filter: blur(6px); }
-  to   { opacity: 1; transform: translateX(0);    filter: blur(0); }
-}
-
 @keyframes title-reveal {
   from { opacity: 0; transform: translateY(32px); filter: blur(14px); }
   to   { opacity: 1; transform: translateY(0);    filter: blur(0); }
@@ -186,7 +181,6 @@ onBeforeUnmount(() => observer?.disconnect())
   }
 }
 
-/* Hidden state */
 .about:not(.is-visible) .top,
 .about:not(.is-visible) .kicker-small,
 .about:not(.is-visible) .title,
@@ -202,7 +196,6 @@ onBeforeUnmount(() => observer?.disconnect())
   opacity: 0;
 }
 
-/* Visible cascade */
 .about.is-visible .top        { animation: fade-right 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.05s both; }
 .about.is-visible .rule       { transform-origin: left center; animation: rule-grow 1.1s cubic-bezier(0.22, 1, 0.36, 1) 0.25s both; }
 
@@ -437,7 +430,7 @@ onBeforeUnmount(() => observer?.disconnect())
   pointer-events: none;
 }
 
-/* ═════════ Responsive ═════════ */
+/* ═════════ Планшет ═════════ */
 
 @media (max-width: 1100px) {
   .body { grid-template-columns: 1fr; gap: 32px; }
@@ -446,11 +439,216 @@ onBeforeUnmount(() => observer?.disconnect())
   .steps { grid-template-columns: repeat(2, 1fr); gap: 20px; }
 }
 
-@media (max-width: 700px) {
-  .frame { padding: 20px 30px; }
-  .facts { flex-wrap: wrap; gap: 20px; }
-  .steps { grid-template-columns: 1fr; }
+/* ═════════ Мобила (портрет) ═════════ */
+
+@media (max-width: 768px) and (orientation: portrait) {
+  .about {
+    height: auto;
+    min-height: 100dvh;
+    /* уменьшил нижний отступ — оставляем свободное место снизу */
+    padding: 20px 0 16px;
+    overflow: visible;
+    /* усиленное затемнение сверху и снизу */
+    background: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.35) 0%,
+      rgba(15, 12, 8, 0.35) 45%,
+      rgba(0, 0, 0, 0.72) 100%
+    );
+  }
+
+  .frame {
+    padding: 16px 20px 8px;
+    gap: 20px;
+  }
+
+  .top { gap: 12px; }
+  .page { font-size: 10px; letter-spacing: 0.18em; }
+  .kicker { font-size: 9px; letter-spacing: 0.18em; }
+
+  .body {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    min-height: 0;
+  }
+
+  .left  { gap: 14px; }
+  .right { height: auto; gap: 10px; }
+
+  .right > .kicker-small {
+    display: inline-flex;
+    font-size: 9px;
+    letter-spacing: 0.24em;
+  }
+
+  /* ─── карусель ─── */
+  .shots {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    flex: none;
+    aspect-ratio: 4 / 3;
+    width: 100%;
+    border-radius: 4px;
+    min-height: 0;
+  }
+
+  .shots::-webkit-scrollbar { display: none; }
+
+  .shot {
+    flex: 0 0 100%;
+    scroll-snap-align: center;
+    border-radius: 4px;
+    box-shadow: none;
+  }
+
+  .shot--a { grid-column: auto; }
+
+  .caption {
+    font-size: 9px;
+    letter-spacing: 0.2em;
+  }
+
+  /* ─── текст ─── */
+  .left .kicker-small {
+    font-size: 9px;
+    letter-spacing: 0.24em;
+  }
+
+  .title {
+    font-size: clamp(40px, 13vw, 60px);
+    line-height: 0.9;
+    letter-spacing: -0.045em;
+  }
+
+  .lead {
+    font-size: 13px;
+    line-height: 1.5;
+    max-width: 100%;
+  }
+
+  .facts {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-top: 4px;
+    padding-top: 14px;
+  }
+
+  .fact-n { font-size: 20px; }
+
+  .fact-t {
+    font-size: 9px;
+    line-height: 1.35;
+    max-width: 100%;
+  }
+
+  /* ─── этапы — компактнее по вертикали ─── */
+  .bottom {
+    padding-top: 12px;
+    gap: 10px;
+  }
+
+  .steps {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .step {
+    gap: 2px;
+    padding-left: 16px;
+  }
+
+  .step::before {
+    top: 4px;
+    width: 8px;
+  }
+
+  .step-n {
+    font-size: 9px;
+    letter-spacing: 0.18em;
+  }
+  .step-t {
+    font-size: 11px;
+    letter-spacing: 0.18em;
+  }
+  .step-d {
+    font-size: 10px;
+    line-height: 1.3;
+  }
+
   .v-mark { display: none; }
+}
+
+@media (max-width: 380px) and (orientation: portrait) {
+  .title { font-size: 36px; }
+  .fact-n { font-size: 18px; }
+  .fact-t { font-size: 8px; }
+
+  .bottom { padding-top: 10px; gap: 8px; }
+  .steps { gap: 8px; }
+  .step-t { font-size: 10px; }
+  .step-d { font-size: 9px; }
+}
+
+/* ═════════ Мобила (ландшафт) — уменьшаем через scale ═════════ */
+
+@media (orientation: landscape) and (max-height: 500px) {
+  .about {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: calc(100vw / 0.68);
+    height: calc(100vh / 0.68);
+    padding: 40px 0;
+    transform: scale(0.68);
+    transform-origin: top left;
+    overflow: hidden;
+  }
+
+  .body {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 60px;
+    align-items: center;
+    min-height: 0;
+  }
+
+  .left  { gap: 20px; }
+  .right { height: 100%; max-height: 100%; gap: 12px; }
+
+  .shots {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1.4fr 1fr;
+    gap: 8px;
+    aspect-ratio: auto;
+    flex: 1;
+    overflow: visible;
+    border-radius: 2px;
+  }
+
+  .shot {
+    flex: auto;
+    scroll-snap-align: none;
+    border-radius: 2px;
+  }
+
+  .shot--a { grid-column: 1 / -1; }
+
+  .steps {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 40px;
+  }
+
+  .step { padding-left: 22px; }
+
+  .v-mark { display: block; }
 }
 
 /* ═════════ Reduced motion ═════════ */

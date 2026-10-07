@@ -40,6 +40,13 @@ onBeforeUnmount(() => observer?.disconnect())
         <h1>Eco<span class="accent">Honest</span></h1>
         <p class="subtitle">Честный эколог</p>
 
+        <p class="lead">Вода · Воздух · Отходы — сопровождение под ключ.</p>
+
+        <div class="contact">
+          <a class="contact-phone" href="tel:+79915917778">+7 (991) 591-77-78</a>
+          <a class="contact-mail" href="mailto:info@ecohonest.ru">info@ecohonest.ru</a>
+        </div>
+
         <div class="note note--sub">
           <span class="dot"></span>
           <span class="line"></span>
@@ -89,7 +96,12 @@ onBeforeUnmount(() => observer?.disconnect())
   justify-content: space-between;
 }
 
-/* ============ Entrance animations ============ */
+.lead,
+.contact {
+  display: none;
+}
+
+/* ═════════ Entrance animations ═════════ */
 
 @keyframes fade-up {
   from { opacity: 0; transform: translateY(18px); filter: blur(6px); }
@@ -121,13 +133,22 @@ onBeforeUnmount(() => observer?.disconnect())
   to   { opacity: 1; }
 }
 
-/* Hidden until section enters viewport */
+@keyframes dot-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(164, 196, 122, 0.55);
+    opacity: 1;
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(164, 196, 122, 0);
+    opacity: 0.75;
+  }
+}
+
 .hero:not(.is-visible) .frame > *,
 .hero:not(.is-visible) .rule {
   opacity: 0;
 }
 
-/* Trigger cascade once visible */
 .hero.is-visible .frame > * {
   animation: fade-up 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
@@ -147,7 +168,7 @@ onBeforeUnmount(() => observer?.disconnect())
   animation: rule-grow 1.1s cubic-bezier(0.22, 1, 0.36, 1) 0.35s both;
 }
 
-/* ============ Layout ============ */
+/* ═════════ Layout ═════════ */
 
 .top {
   display: flex;
@@ -193,17 +214,6 @@ onBeforeUnmount(() => observer?.disconnect())
 
 .note--sub .dot  { animation-delay: 0.6s; }
 .note--meta .dot { animation-delay: 1.2s; }
-
-@keyframes dot-pulse {
-  0%, 100% {
-    box-shadow: 0 0 0 0 rgba(164, 196, 122, 0.55);
-    opacity: 1;
-  }
-  50% {
-    box-shadow: 0 0 0 6px rgba(164, 196, 122, 0);
-    opacity: 0.75;
-  }
-}
 
 .line {
   width: 60px;
@@ -309,6 +319,17 @@ h1 {
   color: #a4c47a;
 }
 
+.copy {
+  position: absolute;
+  left: 50px;
+  bottom: 40px;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(238, 241, 232, 0.5);
+  font-family: system-ui, sans-serif;
+}
+
 .v-mark {
   position: absolute;
   left: 8px;
@@ -323,7 +344,139 @@ h1 {
   white-space: nowrap;
 }
 
-/* ============ Reduced motion ============ */
+/* ═════════ Mobile ═════════ */
+
+@media (max-width: 768px) {
+  .hero {
+    height: 100dvh;
+    min-height: 640px;
+    padding: 20px;
+    /* усилил нижний градиент на мобиле — контент по низу сидит на плотном тёмном */
+    background: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.1) 0%,
+      rgba(0, 0, 0, 0.25) 40%,
+      rgba(0, 0, 0, 0.65) 100%
+    );
+  }
+
+  .frame {
+    padding: 20px 0;
+    gap: 0;
+  }
+
+  .note--air,
+  .note--sub,
+  .note--meta,
+  .tags,
+  .city,
+  .v-mark {
+    display: none;
+  }
+
+  .top {
+    gap: 12px;
+  }
+
+  .page { font-size: 10px; letter-spacing: 0.18em; }
+
+  .kicker {
+    font-size: 9px;
+    letter-spacing: 0.18em;
+  }
+
+  /* заголовок и весь блок — вниз */
+  .title-group {
+    position: static;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: flex-start;
+    gap: 0;
+    max-width: 100%;
+    padding-bottom: 4px;
+  }
+
+  h1 {
+    font-size: clamp(56px, 17vw, 96px);
+    line-height: 0.88;
+    letter-spacing: -0.05em;
+    margin-left: -0.05em;
+  }
+
+  .subtitle {
+    margin-top: 14px;
+    font-size: 12px;
+    letter-spacing: 0.3em;
+  }
+
+  .lead {
+    display: block;
+    margin: 22px 0 0;
+    font-family: system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    color: rgba(238, 241, 232, 0.75);
+    max-width: 300px;
+  }
+
+  .contact {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(164, 196, 122, 0.35);
+    width: 100%;
+    max-width: 300px;
+  }
+
+  .contact-phone {
+    font-family: Georgia, serif;
+    font-size: 26px;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: #a4c47a;
+    text-decoration: none;
+  }
+
+  .contact-mail {
+    font-family: system-ui, sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    color: rgba(238, 241, 232, 0.75);
+    text-decoration: none;
+  }
+
+  /* подвал остаётся под заголовком, тоже по низу */
+  .meta {
+    position: static;
+    text-align: left;
+    margin-top: 18px;
+  }
+
+  .meta .text {
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(238, 241, 232, 0.55);
+  }
+
+  .copy {
+    position: static;
+    margin-top: 6px;
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    color: rgba(238, 241, 232, 0.35);
+  }
+}
+
+@media (max-width: 380px) {
+  h1 { font-size: 52px; }
+  .contact-phone { font-size: 22px; }
+  .lead { font-size: 13px; }
+}
 
 @media (prefers-reduced-motion: reduce) {
   .hero:not(.is-visible) .frame > *,
