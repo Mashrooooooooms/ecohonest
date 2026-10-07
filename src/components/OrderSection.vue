@@ -191,6 +191,7 @@ function reset() {
 
   position: relative;
   height: 100vh;
+  height: 100dvh;
   display: grid;
   grid-template-rows: 64px 1fr;
   color: var(--fg);
@@ -249,11 +250,7 @@ function reset() {
   text-shadow: 0 1px 12px rgba(0, 0, 0, 0.85);
 }
 
-.pg {
-  font-size: 11px;
-  letter-spacing: 0.2em;
-  color: var(--accent);
-}
+.pg { font-size: 11px; letter-spacing: 0.2em; color: var(--accent); }
 
 .rule {
   flex: 1;
@@ -782,14 +779,19 @@ function reset() {
 
 @media (max-width: 960px) {
   .contact {
-    grid-template-rows: 64px auto;
-    height: auto;
-    min-height: 100vh;
+    grid-template-rows: 60px 1fr;
+    height: 100vh;
+    height: 100dvh;
   }
+
   .body {
     grid-template-columns: 1fr;
     grid-template-rows: auto auto;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
   }
+  .body::-webkit-scrollbar { display: none; }
   .left {
     padding: 48px 40px 56px;
     border-bottom: 1px solid var(--hair);
@@ -832,31 +834,126 @@ function reset() {
   }
 }
 
-@media (max-width: 640px) {
-  .top { padding: 0 20px; gap: 12px; }
+/* ═════════ Мобила (портрет) — форма сверху, контакты снизу ═════════ */
+
+@media (max-width: 768px) and (orientation: portrait) {
+  .contact {
+    grid-template-rows: 52px 1fr;
+  }
+
+  .body {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+    min-height: 0;
+    padding: 20px 20px 40px;
+    gap: 24px;
+  }
+
+  /* ─── форма — наверх ─── */
+  .right {
+    order: 1;
+    padding: 0;
+    align-items: stretch;
+    flex: 0 0 auto;
+  }
+
+  .divider { display: none; }
+
+  /* ─── контакты — вниз ─── */
+  .left {
+    order: 2;
+    padding: 0;
+    padding-top: 16px;
+    flex: 0 0 auto;
+    border-top: 1px solid var(--hair);
+    min-height: 0;
+  }
+
+  .ghost { display: none; }
+  .stack { display: none; }
+
+  /* ─── компактные контакты без подчёркивания ─── */
+  .meta {
+    max-width: 100%;
+    border-top: none;
+    gap: 0;
+  }
+
+  .meta li {
+    grid-template-columns: 20px 80px 1fr;
+    gap: 10px;
+    padding: 6px 0;
+    font-size: 11px;
+    align-items: baseline;
+  }
+
+  .m-n { font-size: 10px; }
+  .m-k { font-size: 9px; letter-spacing: 0.18em; }
+
+  .meta li a,
+  .meta li span:last-child {
+    font-size: 12px;
+  }
+
+  /* снимаем анимированное подчёркивание — на тач-экране не нужен */
+  .meta a::after { display: none; }
+  .meta a:hover { color: var(--fg); }
+
+  /* ─── форма компактная ─── */
+  .form,
+  .done {
+    max-width: 100%;
+  }
+
+  .form-top {
+    padding-bottom: 12px;
+    margin-bottom: 2px;
+    font-size: 9px;
+    letter-spacing: 0.28em;
+  }
+
+  .field {
+    grid-template-columns: 22px 76px 1fr;
+    gap: 12px;
+    padding: 12px 0;
+  }
+  .field--area { padding-top: 14px; }
+
+  .f-num { font-size: 11px; }
+  .f-label { font-size: 9px; letter-spacing: 0.2em; }
+
+  .field input { font-size: 15px; }
+  .field textarea { font-size: 13px; }
+
+  .send {
+    margin-top: 20px;
+    padding: 16px 18px;
+    font-size: 10px;
+    letter-spacing: 0.28em;
+  }
+  .send-arrow { font-size: 14px; }
+
+  .note {
+    margin: 12px 0 0;
+    font-size: 9px;
+    line-height: 1.4;
+  }
+
+  .error {
+    font-size: 10px;
+    margin-top: 8px;
+  }
+
+  .done-mark { font-size: 32px; }
+  .done-title { font-size: 32px; margin: 4px 0 8px; }
+  .done-sub { font-size: 12px; max-width: 100%; }
+  .send--alt { margin-top: 14px; }
+
+  .top { padding: 0 20px; gap: 10px; }
   .pg, .kicker { font-size: 9px; }
   .kicker { letter-spacing: 0.2em; }
-
-  .left  { padding: 36px 22px 40px; }
-  .right { padding: 40px 22px 56px; }
-
-  .title { font-size: 56px; }
-  .lead  { font-size: 14px; }
-
-  .meta li,
-  .field {
-    grid-template-columns: 28px 1fr;
-    gap: 10px;
-  }
-  .meta li a,
-  .meta li span:last-child,
-  .field input,
-  .field textarea {
-    grid-column: 1 / -1;
-    padding-top: 4px;
-  }
-
-  .done-title { font-size: 42px; }
 
   .v-mark { display: none; }
 }

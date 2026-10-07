@@ -104,6 +104,7 @@ onBeforeUnmount(() => observer?.disconnect())
 .about {
   position: relative;
   height: 100vh;
+  height: 100dvh;
   padding: 50px 0;
   display: flex;
   flex-direction: column;
@@ -437,17 +438,23 @@ onBeforeUnmount(() => observer?.disconnect())
   .right { height: auto; }
   .shots { aspect-ratio: 16 / 7; }
   .steps { grid-template-columns: repeat(2, 1fr); gap: 20px; }
+
+  /* контент не влез — скроллим строго внутри секции */
+  .frame {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .frame::-webkit-scrollbar { display: none; }
 }
 
 /* ═════════ Мобила (портрет) ═════════ */
 
 @media (max-width: 768px) and (orientation: portrait) {
   .about {
-    height: auto;
-    min-height: 100dvh;
-    /* уменьшил нижний отступ — оставляем свободное место снизу */
+    height: 100dvh;
     padding: 20px 0 16px;
-    overflow: visible;
+    overflow: hidden;
     /* усиленное затемнение сверху и снизу */
     background: linear-gradient(
       to bottom,
@@ -459,8 +466,12 @@ onBeforeUnmount(() => observer?.disconnect())
 
   .frame {
     padding: 16px 20px 8px;
-    gap: 20px;
+    gap: 18px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
   }
+  .frame::-webkit-scrollbar { display: none; }
 
   .top { gap: 12px; }
   .page { font-size: 10px; letter-spacing: 0.18em; }
@@ -475,6 +486,9 @@ onBeforeUnmount(() => observer?.disconnect())
 
   .left  { gap: 14px; }
   .right { height: auto; gap: 10px; }
+
+  /* факты дублируют инфу из hero и services — на мобиле режем ради места */
+  .facts { display: none; }
 
   .right > .kicker-small {
     display: inline-flex;
@@ -492,7 +506,7 @@ onBeforeUnmount(() => observer?.disconnect())
     scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
     flex: none;
-    aspect-ratio: 4 / 3;
+    aspect-ratio: 16 / 10;
     width: 100%;
     border-radius: 4px;
     min-height: 0;
@@ -596,59 +610,61 @@ onBeforeUnmount(() => observer?.disconnect())
   .step-d { font-size: 9px; }
 }
 
-/* ═════════ Мобила (ландшафт) — уменьшаем через scale ═════════ */
+/* ═════════ Мобила (ландшафт) — компактно, без scale-хаков ═════════ */
 
 @media (orientation: landscape) and (max-height: 500px) {
   .about {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: calc(100vw / 0.68);
-    height: calc(100vh / 0.68);
-    padding: 40px 0;
-    transform: scale(0.68);
-    transform-origin: top left;
+    height: 100dvh;
     overflow: hidden;
   }
 
+  .frame {
+    padding: 14px 24px;
+    gap: 12px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .frame::-webkit-scrollbar { display: none; }
+
   .body {
     display: grid;
-    grid-template-columns: 1.4fr 1fr;
-    gap: 60px;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 32px;
     align-items: center;
-    min-height: 0;
   }
 
-  .left  { gap: 20px; }
-  .right { height: 100%; max-height: 100%; gap: 12px; }
+  .left { gap: 12px; }
+  .right { height: auto; gap: 10px; }
 
-  .shots {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1.4fr 1fr;
-    gap: 8px;
-    aspect-ratio: auto;
-    flex: 1;
-    overflow: visible;
-    border-radius: 2px;
+  .facts { display: none; }
+
+  .title { font-size: 36px; }
+
+  .lead {
+    font-size: 12px;
+    line-height: 1.45;
+    max-width: 100%;
   }
 
-  .shot {
-    flex: auto;
-    scroll-snap-align: none;
-    border-radius: 2px;
-  }
+  .shots { aspect-ratio: 16 / 7; }
 
-  .shot--a { grid-column: 1 / -1; }
+  .caption { font-size: 9px; letter-spacing: 0.18em; }
+
+  .bottom { padding-top: 10px; gap: 8px; }
 
   .steps {
     grid-template-columns: repeat(4, 1fr);
-    gap: 40px;
+    gap: 24px;
   }
 
-  .step { padding-left: 22px; }
+  .step { padding-left: 18px; }
+  .step::before { width: 10px; }
+  .step-n { font-size: 9px; }
+  .step-t { font-size: 11px; letter-spacing: 0.16em; }
+  .step-d { font-size: 10.5px; }
 
-  .v-mark { display: block; }
+  .v-mark { display: none; }
 }
 
 /* ═════════ Reduced motion ═════════ */

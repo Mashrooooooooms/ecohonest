@@ -81,6 +81,7 @@ onBeforeUnmount(() => observer?.disconnect())
 .hero {
   position: relative;
   height: 100vh;
+  height: 100dvh;
   padding: 50px;
   background: linear-gradient(to bottom, rgba(0, 0, 0, 0.05) 0%, rgba(0, 0, 0, 0.45) 100%);
   color: #eef1e8;
@@ -349,7 +350,6 @@ h1 {
 @media (max-width: 768px) {
   .hero {
     height: 100dvh;
-    min-height: 640px;
     padding: 20px;
     /* усилил нижний градиент на мобиле — контент по низу сидит на плотном тёмном */
     background: linear-gradient(
@@ -476,6 +476,51 @@ h1 {
   h1 { font-size: 52px; }
   .contact-phone { font-size: 22px; }
   .lead { font-size: 13px; }
+}
+
+/* ═════════ Мобила (ландшафт) ═════════ */
+
+@media (orientation: landscape) and (max-height: 500px) {
+  .hero { padding: 16px; }
+
+  .frame { padding: 12px 16px; }
+
+  .note--air,
+  .copy { display: none; }
+
+  .top { gap: 10px; }
+  .page { font-size: 10px; letter-spacing: 0.18em; }
+  .kicker { font-size: 9px; letter-spacing: 0.18em; }
+
+  h1 { font-size: clamp(44px, 20vh, 84px); }
+
+  .subtitle { margin-top: 8px; font-size: 11px; letter-spacing: 0.26em; }
+
+  .lead {
+    display: block;
+    margin: 12px 0 0;
+    font-size: 12.5px;
+    max-width: 320px;
+  }
+
+  .contact {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 12px;
+    padding-top: 12px;
+    width: 100%;
+    max-width: 320px;
+  }
+
+  .contact-phone { font-size: 20px; }
+  .contact-mail { font-size: 12px; }
+
+  .title-group { left: 16px; bottom: 20px; }
+  .meta { right: 16px; bottom: 20px; }
+
+  .meta .text { font-size: 10px; }
+  .v-mark { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {

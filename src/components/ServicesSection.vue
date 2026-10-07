@@ -181,6 +181,7 @@ const dir = ref('Вода')
 .services {
   position: relative;
   height: 100vh;
+  height: 100dvh;
   padding: 50px 0;
   display: flex;
   flex-direction: column;
@@ -793,14 +794,111 @@ const dir = ref('Вода')
   .body { grid-template-columns: 1fr; gap: 40px; }
   .left { min-height: 540px; }
   .phone { --w: 220px; --h: 460px; }
+
+  /* контент не влез — скроллим строго внутри секции */
+  .frame {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .frame::-webkit-scrollbar { display: none; }
 }
 
 @media (max-width: 700px) {
-  .frame { padding: 20px 30px; }
-  .phones { gap: 12px; }
-  .phone { --w: 160px; --h: 340px; }
-  .phone--a, .phone--b { transform: none; }
-  .bottom { flex-direction: column; align-items: flex-start; gap: 4px; }
+  .frame {
+    padding: 20px;
+    gap: 16px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .frame::-webkit-scrollbar { display: none; }
+
+  /* макеты телефонов — визуальный дубль списка услуг, на мобиле режем */
+  .left { display: none; }
+
+  .body {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .right {
+    gap: 16px;
+    max-width: 100%;
+  }
+
+  .kicker-small { font-size: 9px; letter-spacing: 0.24em; }
+
+  .title {
+    font-size: clamp(34px, 11vw, 48px);
+    line-height: 0.92;
+  }
+
+  .list { gap: 12px; }
+
+  .label {
+    font-size: 11px;
+    letter-spacing: 0.18em;
+  }
+
+  .n { display: none; }
+
+  .text {
+    font-size: 11.5px;
+    line-height: 1.4;
+    padding-left: 14px;
+  }
+
+  .cta-big {
+    margin-top: 2px;
+    padding: 14px 28px;
+    font-size: 15px;
+    gap: 12px;
+    border-radius: 40px;
+  }
+
+  .arrow { font-size: 16px; }
+
+  /* реквизиты и адрес — уже в секции контактов */
+  .bottom { display: none; }
+
+  .v-mark { display: none; }
+}
+
+/* ═════════ Мобила (ландшафт) ═════════ */
+
+@media (orientation: landscape) and (max-height: 500px) {
+  .left { display: none; }
+
+  .frame {
+    padding: 14px 28px;
+    gap: 12px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .frame::-webkit-scrollbar { display: none; }
+
+  .right { gap: 12px; }
+
+  .kicker-small { font-size: 9px; }
+
+  .title { font-size: 34px; }
+
+  .list { gap: 10px; }
+
+  .label { font-size: 11px; }
+
+  .text { font-size: 11.5px; padding-left: 14px; }
+
+  .cta-big {
+    padding: 12px 24px;
+    font-size: 14px;
+    gap: 10px;
+  }
+
+  .bottom { display: none; }
+
   .v-mark { display: none; }
 }
 

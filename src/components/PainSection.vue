@@ -71,36 +71,36 @@ const tickerItems = [
         <span class="kicker">Риски · КоАП · Сроки</span>
       </header>
 
-      <div class="body">
-        <div class="left">
-          <h2>
-            Цена<br />
-            <em>ошибки</em><br />
-            &nbsp;
-          </h2>
+      <div class="left">
+        <h2>
+          Цена<br />
+          <em>ошибки</em><br />
+          &nbsp;
+        </h2>
 
-          <p class="lead">
-            Один неверный показатель в отчёте — статья, штраф, приостановка.
-            Ниже — санкции главы 8 КоАП РФ для юридических лиц на 2026 год.
-          </p>
+        <p class="lead">
+          Один неверный показатель в отчёте — статья, штраф, приостановка.
+          Ниже — санкции главы 8 КоАП РФ для юридических лиц на 2026 год.
+        </p>
 
-          <div class="meta">
-            <div class="meta-item">
-              <span class="meta-n">9</span>
-              <span class="meta-t">составов</span>
-            </div>
-            <div class="meta-item">
-              <span class="meta-n">1 млн</span>
-              <span class="meta-t">макс. штраф</span>
-            </div>
-            <div class="meta-item">
-              <span class="meta-n">90</span>
-              <span class="meta-t">суток стоп</span>
-            </div>
+        <div class="meta">
+          <div class="meta-item">
+            <span class="meta-n">9</span>
+            <span class="meta-t">составов</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-n">1 млн</span>
+            <span class="meta-t">макс. штраф</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-n">90</span>
+            <span class="meta-t">суток стоп</span>
           </div>
         </div>
+      </div>
 
-        <div class="right">
+      <div class="sliders">
+        <div class="slide slide--table">
           <div class="table">
             <div class="thead">
               <span>КоАП</span>
@@ -117,31 +117,33 @@ const tickerItems = [
             </div>
           </div>
         </div>
+
+        <div class="slide slide--cases">
+          <div class="block block--cases">
+            <span class="block-head">Судебная практика</span>
+            <ul class="cases">
+              <li v-for="c in cases" :key="c.date" class="case">
+                <span class="case-date">{{ c.date }}</span>
+                <span class="case-text">{{ c.text }}</span>
+                <span class="case-sum">{{ c.sum }}</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="slide slide--dates">
+          <div class="block block--dates">
+            <span class="block-head">Сроки отчётности</span>
+            <ul class="dates">
+              <li v-for="d in deadlines" :key="d.d" class="date">
+                <span class="date-d">{{ d.d }}</span>
+                <span class="date-t">{{ d.t }}</span>
+              </li>
+            </ul>
+            <p class="fine">Декларация НВОС — п. 8 ст. 16.4 ФЗ № 7-ФЗ. Экосбор — ст. 24.5 ФЗ № 89-ФЗ. Просрочка = ст. 8.41 / 8.41.1 КоАП.</p>
+          </div>
+        </div>
       </div>
-
-      <footer class="bottom">
-        <div class="block block--cases">
-          <span class="block-head">Судебная практика</span>
-          <ul class="cases">
-            <li v-for="c in cases" :key="c.date" class="case">
-              <span class="case-date">{{ c.date }}</span>
-              <span class="case-text">{{ c.text }}</span>
-              <span class="case-sum">{{ c.sum }}</span>
-            </li>
-          </ul>
-        </div>
-
-        <div class="block block--dates">
-          <span class="block-head">Сроки отчётности</span>
-          <ul class="dates">
-            <li v-for="d in deadlines" :key="d.d" class="date">
-              <span class="date-d">{{ d.d }}</span>
-              <span class="date-t">{{ d.t }}</span>
-            </li>
-          </ul>
-          <p class="fine">Декларация НВОС — п. 8 ст. 16.4 ФЗ № 7-ФЗ. Экосбор — ст. 24.5 ФЗ № 89-ФЗ. Просрочка = ст. 8.41 / 8.41.1 КоАП.</p>
-        </div>
-      </footer>
 
       <span class="v-mark">Ecohonest · 2026</span>
     </div>
@@ -159,6 +161,7 @@ const tickerItems = [
 .pain {
   position: relative;
   height: 100vh;
+  height: 100dvh;
   padding: 50px 0;
   display: flex;
   flex-direction: column;
@@ -300,13 +303,16 @@ const tickerItems = [
   z-index: 1;
   flex: 1;
   padding: 14px 70px 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  display: grid;
+  grid-template-columns: 0.75fr 1.65fr;
+  grid-template-rows: auto 1fr auto;
+  gap: 12px 46px;
   min-height: 0;
 }
 
 .top {
+  grid-column: 1 / -1;
+  grid-row: 1;
   display: flex;
   align-items: center;
   gap: 16px;
@@ -317,19 +323,14 @@ const tickerItems = [
 .rule { flex: 1; height: 1px; background: rgba(245, 236, 226, 0.4); }
 .kicker { font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase; color: rgba(245, 236, 226, 0.9); }
 
-.body {
-  flex: 1;
-  display: grid;
-  grid-template-columns: 0.75fr 1.65fr;
-  gap: 46px;
-  align-items: center;
-  min-height: 0;
-}
-
 .left {
+  grid-column: 1;
+  grid-row: 2;
+  align-self: center;
   display: flex;
   flex-direction: column;
   gap: 14px;
+  min-width: 0;
 }
 
 h2 {
@@ -378,12 +379,28 @@ h2 em {
   color: rgba(245, 236, 226, 0.55);
 }
 
-.right {
-  min-height: 0;
-  display: flex;
-  align-items: center;
+/* ─── Sliders: на десктопе прозрачная обёртка ─── */
+.sliders { display: contents; }
+
+.slide { min-width: 0; }
+
+.slide--table {
+  grid-column: 2;
+  grid-row: 2;
+  align-self: center;
 }
 
+.slide--cases {
+  grid-column: 1;
+  grid-row: 3;
+}
+
+.slide--dates {
+  grid-column: 2;
+  grid-row: 3;
+}
+
+/* ─── Таблица ─── */
 .table {
   width: 100%;
   display: flex;
@@ -449,14 +466,7 @@ h2 em {
   font-weight: 700;
 }
 
-.bottom {
-  display: grid;
-  grid-template-columns: 1.5fr 1fr;
-  gap: 46px;
-  border-top: 1px solid rgba(245, 236, 226, 0.2);
-  padding-top: 10px;
-}
-
+/* ─── Практика и сроки ─── */
 .block {
   display: flex;
   flex-direction: column;
@@ -543,18 +553,32 @@ h2 em {
   pointer-events: none;
 }
 
-@media (max-width: 1200px) {
-  .body { grid-template-columns: 1fr; gap: 20px; }
-  .bottom { grid-template-columns: 1fr; gap: 14px; }
-  .frame { padding: 14px 40px; }
+/* ─── Средние экраны ─── */
+@media (max-width: 1200px) and (min-width: 769px) {
+  .frame {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto auto auto;
+    gap: 14px;
+    padding: 14px 40px;
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+  .frame::-webkit-scrollbar { display: none; }
+
+  .top { grid-column: 1; grid-row: 1; }
+  .left { grid-column: 1; grid-row: 2; align-self: auto; }
+
+  .sliders { display: contents; }
+  .slide--table { grid-column: 1; grid-row: 3; align-self: auto; }
+  .slide--cases { grid-column: 1; grid-row: 4; }
+  .slide--dates { grid-column: 1; grid-row: 5; }
 }
 
-/* ═════════ Мобила (портрет) ═════════ */
+/* ═════════ Мобила (портрет) — таблица + сроки, без практики ═════════ */
 
 @media (max-width: 768px) and (orientation: portrait) {
   .pain {
-    height: auto;
-    min-height: 100dvh;
+    height: 100dvh;
     padding: 0;
     overflow: hidden;
     background: linear-gradient(
@@ -566,49 +590,64 @@ h2 em {
   }
 
   .frame {
-    padding: 14px 20px 20px;
-    gap: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    /* сдвигаем весь контент вниз */
+    padding: 28px 20px 24px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: none;
   }
+  .frame::-webkit-scrollbar { display: none; }
 
   .top { gap: 10px; }
   .page { font-size: 10px; letter-spacing: 0.18em; }
   .kicker { font-size: 9px; letter-spacing: 0.18em; }
 
-  .body {
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
-    align-items: stretch;
-    min-height: 0;
+  .left {
+    gap: 10px;
+    align-self: auto;
+    /* лёгкий отступ сверху, чтобы заголовок не лип к шапке */
+    padding-top: 6px;
   }
 
-  .left { gap: 12px; }
-
   h2 {
-    font-size: clamp(38px, 12vw, 56px);
+    font-size: clamp(34px, 11vw, 48px);
     line-height: 0.9;
   }
 
-  .lead {
-    font-size: 12px;
-    line-height: 1.5;
-    max-width: 100%;
-  }
+  .lead { display: none; }
 
   .meta {
     gap: 20px;
-    padding-top: 10px;
+    padding-top: 8px;
   }
 
   .meta-n { font-size: 20px; }
   .meta-t { font-size: 9px; letter-spacing: 0.1em; }
 
-  /* ─── таблица: без колонки «Стоп» ─── */
-  .right { display: block; }
+  /* слайдеры → обычный вертикальный поток */
+  .sliders {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .slide { flex: none; min-width: 0; }
+
+  .slide--cases { display: none; }
+
+  .slide--table,
+  .slide--dates {
+    grid-column: auto;
+    grid-row: auto;
+    align-self: auto;
+  }
 
   .thead,
   .tr {
-    grid-template-columns: 72px minmax(0, 1fr) 120px;
+    grid-template-columns: 68px minmax(0, 1fr) 110px;
     column-gap: 10px;
     padding: 6px 0;
   }
@@ -630,74 +669,9 @@ h2 em {
     overflow-wrap: anywhere;
     word-break: break-word;
   }
-  .td-sum {
-    font-size: 11.5px;
-    text-align: right;
-  }
-
-  /* ─── карусель: таблица | практика | сроки ─── */
-  .bottom {
-    display: flex;
-    gap: 14px;
-    overflow-x: auto;
-    overflow-y: hidden;
-    scroll-snap-type: x mandatory;
-    scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
-    margin: 0 -20px;
-    padding: 12px 20px 0;
-    border-top: 1px solid rgba(245, 236, 226, 0.2);
-  }
-
-  .bottom::-webkit-scrollbar { display: none; }
-
-  .block {
-    flex: 0 0 85%;
-    scroll-snap-align: start;
-    gap: 8px;
-    min-width: 0;
-  }
+  .td-sum { font-size: 11.5px; }
 
   .block-head { font-size: 9px; letter-spacing: 0.2em; }
-
-  /* ─── практика ─── */
-  .cases { gap: 10px; }
-
-  .case {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    column-gap: 12px;
-    row-gap: 2px;
-    align-items: baseline;
-  }
-
-  .case-date {
-    grid-column: 1;
-    grid-row: 1;
-    font-size: 10px;
-  }
-
-  .case-sum {
-    grid-column: 2;
-    grid-row: 1;
-    justify-self: end;
-    font-size: 12px;
-  }
-
-  .case-text {
-    grid-column: 1 / -1;
-    grid-row: 2;
-    font-size: 11.5px;
-    line-height: 1.35;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    overflow-wrap: anywhere;
-    word-break: break-word;
-  }
-
-  /* ─── сроки ─── */
   .block--dates { gap: 6px; }
 
   .dates {
@@ -707,24 +681,10 @@ h2 em {
   }
 
   .date { gap: 1px; }
+  .date-d { font-size: 16px; }
+  .date-t { font-size: 8.5px; letter-spacing: 0.08em; line-height: 1.2; }
 
-  .date-d {
-    font-size: 16px;
-    line-height: 1;
-  }
-
-  .date-t {
-    font-size: 8.5px;
-    letter-spacing: 0.08em;
-    line-height: 1.2;
-  }
-
-  .fine {
-    font-size: 9px;
-    line-height: 1.35;
-    margin-top: 6px;
-    overflow-wrap: anywhere;
-  }
+  .fine { display: none; }
 
   .ticker { padding: 6px 0; }
   .ticker-track {
@@ -733,9 +693,7 @@ h2 em {
     letter-spacing: 0.18em;
     animation-duration: 38s;
   }
-  .ticker-item::before {
-    margin-right: 28px;
-  }
+  .ticker-item::before { margin-right: 28px; }
 
   .v-mark { display: none; }
 }
@@ -746,85 +704,85 @@ h2 em {
 
   .thead,
   .tr {
-    grid-template-columns: 66px minmax(0, 1fr) 100px;
+    grid-template-columns: 62px minmax(0, 1fr) 96px;
     column-gap: 8px;
   }
   .td-text { font-size: 11px; }
   .td-sum { font-size: 11px; }
 
-  .block { flex: 0 0 88%; }
-
   .date-d { font-size: 14px; }
   .date-t { font-size: 8px; letter-spacing: 0.06em; }
-
-  .case-text { font-size: 11px; }
-  .case-sum { font-size: 11px; }
 }
 
-/* ═════════ Мобила (ландшафт) — zoom ═════════ */
+/* ═════════ Мобила (ландшафт) ═════════ */
 
 @media (orientation: landscape) and (max-height: 500px) {
   .pain {
-    height: calc(100dvh / 0.62);
-    padding: 30px 0;
-    zoom: 0.62;
+    height: 100dvh;
+    padding: 0;
     overflow: hidden;
   }
 
-  .body {
-    grid-template-columns: 0.75fr 1.65fr;
-    gap: 40px;
+  .frame {
+    padding: 12px 24px 14px;
+    gap: 10px 28px;
+    overflow-y: auto;
+    scrollbar-width: none;
   }
+  .frame::-webkit-scrollbar { display: none; }
 
-  .bottom {
-    grid-template-columns: 1.5fr 1fr;
-    gap: 40px;
-    margin: 0;
-    padding: 10px 0 0;
-    overflow: visible;
-  }
+  .sliders { display: contents; }
+
+  .lead { display: none; }
+
+  h2 { font-size: 40px; }
+
+  .meta { gap: 18px; padding-top: 8px; }
+  .meta-n { font-size: 17px; }
+  .meta-t { font-size: 9px; }
 
   .thead,
   .tr {
-    grid-template-columns: 80px minmax(0, 1fr) 140px 62px;
-    column-gap: 16px;
-    padding: 5px 0;
+    grid-template-columns: 70px minmax(0, 1fr) 110px 54px;
+    column-gap: 12px;
+    padding: 4px 0;
   }
 
-  .thead span:last-child,
-  .td-stop { display: revert; }
-
+  .thead { font-size: 9px; }
+  .td-code { font-size: 11px; }
   .td-text {
+    font-size: 11.5px;
     white-space: nowrap;
     display: block;
     -webkit-line-clamp: unset;
     overflow: hidden;
     text-overflow: ellipsis;
   }
+  .td-sum { font-size: 11.5px; }
+  .td-stop { font-size: 10px; }
 
-  .dates {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 18px;
-  }
+  .block { gap: 6px; }
+  .block-head { font-size: 9px; letter-spacing: 0.2em; }
 
-  .case {
-    grid-template-columns: 78px minmax(0, 1fr) 92px;
-    gap: 14px;
-    align-items: center;
-  }
-
-  .case-date { grid-column: auto; grid-row: auto; }
-  .case-sum  { grid-column: auto; grid-row: auto; justify-self: auto; }
+  .cases { gap: 4px; }
+  .case { grid-template-columns: 70px minmax(0, 1fr) 84px; gap: 10px; }
+  .case-date { font-size: 10px; }
   .case-text {
-    grid-column: auto;
-    grid-row: auto;
-    -webkit-line-clamp: unset;
+    font-size: 11px;
     display: block;
-    overflow: visible;
+    -webkit-line-clamp: unset;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
+  .case-sum { font-size: 12px; }
 
-  .v-mark { display: block; }
+  .dates { display: flex; flex-wrap: wrap; gap: 18px; }
+  .date-d { font-size: 16px; }
+  .date-t { font-size: 8.5px; }
+
+  .fine { display: none; }
+  .v-mark { display: none; }
 }
 
 /* ═════════ Reduced motion ═════════ */

@@ -55,6 +55,7 @@ onBeforeUnmount(() => observer?.disconnect())
 
   position: relative;
   height: 100vh;
+  height: 100dvh;
   display: grid;
   grid-template-rows: 64px 1fr;
   color: var(--fg);
